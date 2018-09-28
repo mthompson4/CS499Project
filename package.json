@@ -1,0 +1,23 @@
+{
+  "name": "cs499project",
+  "version": "1.0.0",
+  "description": "Collaborative IDE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mthompson4/CS499Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mthompson4/CS499Project/issues"
+  },
+  "homepage": "https://github.com/mthompson4/CS499Project#readme",
+  "dependencies": {
+    "codemirror": "^5.40.2",
+    "express": "^4.16.3"
+  }
+}
