@@ -12,93 +12,122 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/theme/monokai.css" />
   
+  <!-- CodeMirror Addons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/theme/monokai.css" />
+
+  <!-- CodeMirror Modes -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/javascript/javascript.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/python/python.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/xml/xml.js"></script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/edit/closebrackets.js"></script>
+
   <!-- Firepad -->
   <link rel="stylesheet" href="https://cdn.firebase.com/libs/firepad/1.4.0/firepad.css" />
   <script src="https://cdn.firebase.com/libs/firepad/1.4.0/firepad.min.js"></script>
-  
   <script type="text/javascript "src="/assets/js/firepad-userlist.js"></script>
-  <link rel="stylesheet" href="assets/css/firepad-userlist.css" />
+  <script type="text/javascript "src="/assets/js/firepad-init.js"></script>
+  <link rel="stylesheet" href="/assets/css/firepad-userlist.css" />
+
+  <!-- Bootstrap CSS & JS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
   <style>
     html { height: 100%; }
     body { margin: 0; height: 100%; }
-    /* Height / width / positioning can be customized for your use case.
-       For demo purposes, we make the user list 175px and firepad fill the rest of the page. */
+
+    .fixed-top #first { 
+      -webkit-transition:padding 0.2s ease;
+      -moz-transition:padding 0.2s ease; 
+      -o-transition:padding 0.2s ease;        
+      transition:padding 0.2s ease;  
+    }
+    .affix #first {
+      padding-top: 0.2em !important;
+      padding-bottom: 0.2em !important;
+      -webkit-transition:padding 0.2s linear;
+      -moz-transition:padding 0.2s linear;  
+      -o-transition:padding 0.2s linear;         
+      transition:padding 0.2s linear;  
+    }
+
+    main {
+      margin-top: 112px;
+      height: 100%;
+    }
+
     #userlist {
-      position: absolute; left: 0; top: 0; bottom: 0; height: auto;
+      position: absolute; left: 0; top: 112px; bottom: 0; height: auto;
       width: 175px;
     }
     #firepad {
-      position: absolute; left: 175px; top: 0; bottom: 0; right: 0; height: auto;
+      position: absolute; left: 175px; top: 112px; bottom: 0; right: 0; height: auto;
     }
   </style>
 </head>
 
-<body onload="init()">
-  <div id="userlist"></div>
-  <div id="firepad"></div>
-
-  <script>
-    function init() {
-      var config = {
-        apiKey: "AIzaSyAKULc7VqbYUHAAehKR0bDf42WRLyTKch0",
-        authDomain: "test-project-5632e.firebaseapp.com",
-        databaseURL: "https://test-project-5632e.firebaseio.com",
-        projectId: "test-project-5632e",
-        storageBucket: "test-project-5632e.appspot.com",
-        messagingSenderId: "214812957898"
-      };
-      firebase.initializeApp(config);
-      var storage = firebase.storage();
-
-      //// Get Firebase Database reference.
-      var firepadRef = getExampleRef();
-
-      //// Create CodeMirror (with lineWrapping on).
-      var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true,
-        lineNumbers: true,
-        mode: 'xml'
-      });
-      document.getElementById('userlist').addEventListener('click',function(){
-        saveToCloud(firepad, storage);
-      });
-
-
-      // Create a random ID to use as our user ID (we must give this to firepad and FirepadUserList).
-      var userId = Math.floor(Math.random() * 9999999999).toString();
-
-      //// Create Firepad (with rich text features and our desired userId).
-      var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
-          { userId: userId});
-
-      //// Create FirepadUserList (with our desired userId).
-      var firepadUserList = FirepadUserList.fromDiv(firepadRef.child('users'),
-          document.getElementById('userlist'), userId);
-    }
-
-    function saveToCloud(firepad, storage){
-      console.log(firepad.getText());
-      var storageRef = storage.ref();
-      var imagesRef = storageRef.child('images');
-      var filename = 'index.html';
-      var testRef = imagesRef.child(filename);
-      var message = firepad.getText();
-      testRef.putString(message).then(function(snapshot) {
-        console.log('Uploaded file successfully!!');
-      });
-
-    }
-
-    // Helper to get hash from end of URL or generate a random one.
-    function getExampleRef() {
-      var ref = firebase.database().ref();
-      return ref;
-    }
-
-  </script>
+<body class="bg-light" onload="init()">
+    
+    <div class="fixed-top" data-toggle="affix">
+      
+      <div class="navbar navbar-dark bg-dark navbar-expand-sm" id="first">
+        <a class="navbar-brand" href="#">
+          <img src="/assets/img/logo.png" width="40" height="30" alt="">
+        </a>
+        <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
+        </div>
+      </div>
+      
+      <div class="navbar navbar-light bg-light navbar-expand-sm shadow-sm" id="second">
+        <div class="collapse navbar-collapse" id="navbarsExample10">
+          <ul class="nav nav-pills">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">New File</a>
+                <a class="dropdown-item">Download</a>
+                <a class="dropdown-item">Delete File</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">Undo</a>
+                <a class="dropdown-item">Redo</a>
+                <a class="dropdown-item">Comment</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Find</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">Find</a>
+                <a class="dropdown-item">Replace</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Source Control</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">Commit</a>
+                <a class="dropdown-item">Push</a>
+                <a class="dropdown-item">Pull</a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-primary" id="saveButton">Save</button>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="saveTimestamp"><u>Last Saved at 12:34PM</u></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <main role="main" class="container">
+      <div id="userlist"></div>
+      <div id="firepad"></div>
+    </main>
 </body>
 </html>
