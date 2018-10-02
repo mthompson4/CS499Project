@@ -16,7 +16,8 @@
       //// Create CodeMirror (with lineWrapping on).
       var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true,
         lineNumbers: true,
-        mode: 'xml'
+        mode: 'xml',
+        autoCloseTags: true
       });
 
       // Add Event Listeners to our DOM elements because onclick() won't work w/firepad object
@@ -44,6 +45,8 @@
       var message = firepad.getText();
       testRef.putString(message).then(function(snapshot) {
         alert('Uploaded file successfully!!');
+        let date = new Date();
+        document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved at ' + date.toLocaleTimeString() + '</u>';
       });
     }
 

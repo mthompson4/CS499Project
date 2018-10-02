@@ -12,15 +12,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/theme/monokai.css" />
   
-  <!-- CodeMirror Addons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/theme/monokai.css" />
-
   <!-- CodeMirror Modes -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/javascript/javascript.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/python/python.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/mode/xml/xml.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/edit/closebrackets.js"></script>
+  <!-- CodeMirror Addons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/theme/monokai.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/addon/edit/closetag.js"></script>
 
   <!-- Firepad -->
   <link rel="stylesheet" href="https://cdn.firebase.com/libs/firepad/1.4.0/firepad.css" />
@@ -53,7 +52,6 @@
       -o-transition:padding 0.2s linear;         
       transition:padding 0.2s linear;  
     }
-
     main {
       margin-top: 112px;
       height: 100%;
@@ -67,12 +65,11 @@
       position: absolute; left: 175px; top: 112px; bottom: 0; right: 0; height: auto;
     }
   </style>
+  <title>CS 499 Demo</title>
 </head>
 
 <body class="bg-light" onload="init()">
-    
     <div class="fixed-top" data-toggle="affix">
-      
       <div class="navbar navbar-dark bg-dark navbar-expand-sm" id="first">
         <a class="navbar-brand" href="#">
           <img src="/assets/img/logo.png" width="40" height="30" alt="">
