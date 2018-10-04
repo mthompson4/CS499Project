@@ -17,6 +17,7 @@
       var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true,
         lineNumbers: true,
         mode: 'xml',
+        keyMap: "sublime",
         autoCloseTags: true
       });
 
