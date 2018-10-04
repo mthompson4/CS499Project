@@ -1,3 +1,4 @@
+    // initialize the firebase contents, codemirror object, and firepad object
     function init() {
       var config = {
         apiKey: "AIzaSyAKULc7VqbYUHAAehKR0bDf42WRLyTKch0",
@@ -22,7 +23,6 @@
       });
 
       // Add Event Listeners to our DOM elements because onclick() won't work w/firepad object
-
       document.getElementById('saveButton').addEventListener('click',function(){
         saveToCloud(firepad, storage);
       });
@@ -37,18 +37,44 @@
       //// Create FirepadUserList (with our desired userId).
       var firepadUserList = FirepadUserList.fromDiv(firepadRef.child('users'),
           document.getElementById('userlist'), userId);
+
+      updateTimestamp();
     }
 
+    // Save a file to the cloud and update the save timestamp
     function saveToCloud(firepad, storage){
+      // grab the timestamp element
+      var saveTimestampElement = document.getElementById('saveTimestamp');
+      saveTimestampElement.innerHTML = 'Saving......';
+      // get the firebase storage ref
       var storageRef = storage.ref();
       var filename = 'index.html';
       var testRef = storageRef.child(filename);
+      // grab the contents of the editor as a string
       var message = firepad.getText();
+      // putString saves the file to firebase storage
       testRef.putString(message).then(function(snapshot) {
-        alert('Uploaded file successfully!!');
+        // grab the current timestamp
         let date = new Date();
-        document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved at ' + date.toLocaleTimeString() + '</u>';
+        let saveTimestamp = date.toLocaleTimeString();
+        saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
+        // set the ref in the firebase database with the timestamp
+        var databaseRef = firebase.database().ref().child('/save');
+        var postData = {
+          "Timestamp": saveTimestamp
+        };
+        databaseRef.set(postData);
       });
+    }
+
+    // update the save timestamp when saved
+    function updateTimestamp(){
+      var timestampRef = firebase.database().ref('/save');
+      // listen for changes to the value of the timestamp
+      timestampRef.on('value', function(snapshot){
+        var saveTimestamp = snapshot.val()["Timestamp"];
+        document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
+      })
     }
 
     // Helper to get hash from end of URL or generate a random one.
