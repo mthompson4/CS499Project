@@ -27,6 +27,11 @@
         saveToCloud(firepad, storage);
       });
 
+      // Add Event Listeners to undo button
+      document.getElementById('undoButton').addEventListener('click',function(){
+        // whatever code you want to execute here
+      });
+
       // Create a random ID to use as our user ID (we must give this to firepad and FirepadUserList).
       var userId = Math.floor(Math.random() * 9999999999).toString();
 
@@ -39,6 +44,10 @@
           document.getElementById('userlist'), userId);
 
       updateTimestamp();
+    }
+
+    function undo(codemirror) {
+      // codemirror.undo()
     }
 
     // Save a file to the cloud and update the save timestamp
