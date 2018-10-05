@@ -1,0 +1,82 @@
+<div class="fixed-top" data-toggle="affix">
+      <div class="navbar navbar-dark bg-dark navbar-expand-sm" id="first">
+        <a class="navbar-brand" href="#">
+          <img src="/assets/img/logo.png" width="40" height="30" alt="">
+        </a>
+        <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
+        </div>
+      </div>
+      
+      <div class="navbar navbar-light bg-light navbar-expand-sm shadow-sm" id="second">
+        <div class="collapse navbar-collapse" id="navbarsExample10">
+          <ul class="nav nav-pills">
+            <li class="nav-item">
+              <a class="nav-link" id="currentFileName"><strong>index.html</strong></a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">New File</a>
+                <a class="dropdown-item">Download</a>
+                <a class="dropdown-item">Delete File</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">Undo</a>
+                <a class="dropdown-item">Redo</a>
+                <a class="dropdown-item">Comment</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Find</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">Find</a>
+                <a class="dropdown-item">Replace</a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Source Control</a>
+              <div class="dropdown-menu" aria-labelledby="dropdown10">
+                <a class="dropdown-item">Commit</a>
+                <a class="dropdown-item">Push</a>
+                <a class="dropdown-item">Pull</a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-primary" id="saveButton">Save</button>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="saveTimestamp"><u>Last Saved at 12:34PM</u></a>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-primary" id="shareButton" data-toggle="modal" data-target="#exampleModal">Share</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <main role="main" class="container">
+      <div id="userlist"></div>
+      <div id="firepad"></div>
+       <!-- Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Share File</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Insert Sharing Logic Here
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
