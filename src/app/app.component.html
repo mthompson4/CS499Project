@@ -45,7 +45,7 @@
               </div>
             </li>
             <li class="nav-item">
-              <button class="btn btn-primary" id="saveButton">Save</button>
+              <button class="btn btn-primary" id="saveButton" (click)="saveToCloud()">Save</button>
             </li>
             <li class="nav-item">
               <a class="nav-link" id="saveTimestamp"><u>Last Saved at 12:34PM</u></a>
@@ -58,8 +58,11 @@
       </div>
     </div>
     <main role="main" class="container">
-      <div id="userlist"></div>
-      <div id="firepad"></div>
+    <div id="userlist"></div>
+    <div id="firepad">
+  		<codemirror [config]="options"></codemirror>
+	  </div>
+      <file-toggle></file-toggle>
        <!-- Modal -->
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">

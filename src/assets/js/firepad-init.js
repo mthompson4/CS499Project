@@ -9,34 +9,26 @@
         messagingSenderId: "214812957898"
       };
       firebase.initializeApp(config);
-      var storage = firebase.storage();
+      // var storage = firebase.storage();
 
       //// Get Firebase Database reference.
-      var firepadRef = getExampleRef();
-
-      //// Create CodeMirror (with lineWrapping on).
-      var codeMirror = CodeMirror(document.getElementById('firepad'), { lineWrapping: true,
-        lineNumbers: true,
-        mode: 'xml',
-        keyMap: "sublime",
-        autoCloseTags: true
-      });
+      // var firepadRef = getExampleRef();
 
       // Add Event Listeners to our DOM elements because onclick() won't work w/firepad object
-      document.getElementById('saveButton').addEventListener('click',function(){
-        saveToCloud(firepad, storage);
-      });
+      // document.getElementById('saveButton').addEventListener('click',function(){
+      //   saveToCloud(firepad, storage);
+      // });
 
       // Create a random ID to use as our user ID (we must give this to firepad and FirepadUserList).
-      var userId = Math.floor(Math.random() * 9999999999).toString();
+      // var userId = Math.floor(Math.random() * 9999999999).toString();
 
       //// Create Firepad (with rich text features and our desired userId).
-      var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
-          { userId: userId});
+      // var firepad = Firepad.fromCodeMirror(firepadRef, codeMirror,
+      //     { userId: userId});
 
-      //// Create FirepadUserList (with our desired userId).
-      var firepadUserList = FirepadUserList.fromDiv(firepadRef.child('users'),
-          document.getElementById('userlist'), userId);
+      // //// Create FirepadUserList (with our desired userId).
+      // var firepadUserList = FirepadUserList.fromDiv(firepadRef.child('users'),
+      //     document.getElementById('userlist'), userId);
 
       updateTimestamp();
     }
