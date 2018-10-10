@@ -20,11 +20,8 @@ export class FileToggleComponent{
 		this.items = db.list('files').valueChanges();
 	}
 
-	fileClicked(){
-		console.log("clicked");
-		let filename = "index.html";
+	fileClicked(filename){
+		console.log(filename);
 		this.events.publish('file:toggled', filename);
-		let path = "/editor/" + filename;
-		this.router.navigate([path]);
 	}
 }

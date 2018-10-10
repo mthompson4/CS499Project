@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, Event } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Events } from 'ionic-angular';
@@ -21,7 +21,7 @@ import 'codemirror/keymap/sublime.js';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css']
 })
-export class EditorComponent implements OnInit {
+export class EditorComponent {
   @ViewChild(CodemirrorComponent) cm: CodemirrorComponent;
   currentFileName = 'index.html';
   options = {
@@ -47,17 +47,9 @@ export class EditorComponent implements OnInit {
     public events: Events
   ) {
     events.subscribe('file:toggled', (filename) => {
-      this.testFunc(filename);
-    });
-
-    router.events.subscribe( (event: Event) => {
-    	console.log(event);
+      this.changeFile(filename);
     });
    }
-
-  ngOnInit(){
-    console.log(+this.route.snapshot.paramMap);
-  }
 
   ngAfterViewInit() {
     const codemirrorInstance = this.cm.instance;
@@ -113,10 +105,13 @@ export class EditorComponent implements OnInit {
     })
   }
 
-  testFunc(filename){
+  changeFile(filename){
     console.log(filename);
     this.currentFileName = filename;
-    window.location.reload();
+    // document.getElementById('codemirrorElement').innerHTML = '';
+    this.firepad.dispose();
+    this.cm.setValue('');
+    this.setFileInFirepad(filename);
   }
 
 
