@@ -11,11 +11,13 @@ import { CodemirrorModule } from 'ng2-codemirror';
 import { FormsModule } from '@angular/forms';
 import { Events } from 'ionic-angular';
 import { AppRoutingModule } from './app-routing.module';
+import { EditorComponent } from './editor/editor.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    FileToggleComponent
+    FileToggleComponent,
+    EditorComponent
   ],
   imports: [
     BrowserModule,
