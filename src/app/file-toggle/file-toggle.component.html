@@ -1,6 +1,6 @@
 <div class="list-group">
 <ul>
-	<li class="list-group-item list-group-item-action" *ngFor="let item of items | async">
+	<li class="list-group-item list-group-item-action" *ngFor="let item of items | async" routerLink="/editor/{{ item.filename }}">
 	   {{ item.filename }}
 	</li>
 </ul>

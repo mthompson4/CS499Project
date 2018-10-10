@@ -1,5 +1,7 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import { Events } from 'ionic-angular';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
@@ -20,7 +22,7 @@ import 'codemirror/keymap/sublime.js';
 })
 export class AppComponent implements AfterViewInit {
   @ViewChild(CodemirrorComponent) cm: CodemirrorComponent;
-
+  currentFileName = 'index.html';
   options = {
     mode: {
       name: 'xml',
@@ -36,11 +38,19 @@ export class AppComponent implements AfterViewInit {
 
   firepad;
   ref: firebase.database.Reference;
+  currentFileRef: firebase.database.Reference;
 
-  ngAfterViewInit() {
-    const codemirrorInstance = this.cm.instance;
-    this.cm = codemirrorInstance;
+  constructor(
+    private route: ActivatedRoute,
+    public events: Events
+  ) {
+    events.subscribe('file:toggled', (filename) => {
+      this.testFunc(filename);
+    });
+   }
 
+  ngOnInit(){
+    console.log(+this.route.snapshot.paramMap);
     const firebaseConfig = {
       apiKey: "AIzaSyAKULc7VqbYUHAAehKR0bDf42WRLyTKch0",
       authDomain: "test-project-5632e.firebaseapp.com",
@@ -49,13 +59,24 @@ export class AppComponent implements AfterViewInit {
       storageBucket: "test-project-5632e.appspot.com",
       messagingSenderId: "214812957898"
     }
-
     firebase.initializeApp(firebaseConfig);
+  }
 
+  ngAfterViewInit() {
+    const codemirrorInstance = this.cm.instance;
+    this.cm = codemirrorInstance;
+    
     this.ref = firebase.database().ref();
-    this.firepad = Firepad.fromCodeMirror(this.ref, codemirrorInstance);
+    this.currentFileRef = this.ref.child('files').child('index');
+    this.firepad = Firepad.fromCodeMirror(this.currentFileRef, codemirrorInstance);
 
     this.updateTimestamp();
+  }
+
+  setFileInFirepad(filename){
+    let key = filename.split('.')[0];
+    this.currentFileRef = this.ref.child('files').child(key);
+    this.firepad = Firepad.fromCodeMirror(this.currentFileRef, this.cm);
   }
 
   // Save a file to the cloud and update the save timestamp
@@ -65,9 +86,9 @@ export class AppComponent implements AfterViewInit {
     // grab the timestamp element
     var saveTimestampElement = document.getElementById('saveTimestamp');
     saveTimestampElement.innerHTML = 'Saving......';
+    
     // get the firebase storage ref
-    var filename = 'index.html';
-    var testRef = storageRef.child(filename);
+    var testRef = storageRef.child(this.currentFileName);
     // grab the contents of the editor as a string
     var message = this.firepad.getText();
     // putString saves the file to firebase storage
@@ -93,6 +114,12 @@ export class AppComponent implements AfterViewInit {
       var saveTimestamp = snapshot.val()["Timestamp"];
       document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
     })
+  }
+
+  testFunc(filename){
+    console.log(filename);
+    this.currentFileName = filename;
+    window.location.reload();
   }
 
 

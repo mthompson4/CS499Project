@@ -9,6 +9,8 @@ import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
 import { CodemirrorModule } from 'ng2-codemirror';
 import { FormsModule } from '@angular/forms';
+import { Events } from 'ionic-angular';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -20,9 +22,10 @@ import { FormsModule } from '@angular/forms';
     AngularFireModule.initializeApp(environment.firebase, 'test-project'),
     AngularFireDatabaseModule,
     CodemirrorModule,
+    AppRoutingModule,
     FormsModule
   ],
-  providers: [],
+  providers: [Events],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

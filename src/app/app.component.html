@@ -11,7 +11,7 @@
         <div class="collapse navbar-collapse" id="navbarsExample10">
           <ul class="nav nav-pills">
             <li class="nav-item">
-              <a class="nav-link" id="currentFileName"><strong>index.html</strong></a>
+              <a class="nav-link" id="currentFileName"><strong>{{ currentFileName }}</strong></a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="https://example.com" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</a>
@@ -56,11 +56,12 @@
           </ul>
         </div>
       </div>
+      <router-outlet></router-outlet>
     </div>
     <main role="main" class="container">
     <div id="userlist"></div>
     <div id="firepad">
-  		<codemirror [config]="options"></codemirror>
+  		<codemirror [config]="options" id="codemirrorElement"></codemirror>
 	  </div>
       <file-toggle></file-toggle>
        <!-- Modal -->
