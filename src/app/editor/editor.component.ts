@@ -11,6 +11,7 @@ import * as Firepad from '../../libs/firepad/dist/firepad';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/xml/xml';
+import 'codemirror/mode/python/python';
 import 'codemirror/addon/edit/closetag.js';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/keymap/sublime.js';
@@ -112,7 +113,29 @@ export class EditorComponent {
     this.firepad.dispose();
     this.cm.setValue('');
     this.setFileInFirepad(filename);
+    this.changeMode(filename);
   }
 
+  changeMode(filename) {
+    let extension = filename.split('.')[1];
+    var newMode;
+    console.log(extension);
+    if(extension == 'html') {
+      newMode = 'xml';
+    }
+    else if(extension == 'js'){
+      newMode = 'javascript';
+    }
+    else if(extension == 'py'){
+      newMode = 'python';
+    }
+    console.log(newMode);
+    this.options = {
+      ...this.options,
+      mode: newMode,
+    };
+    console.log(this.options);
+    this.cm.setOption("mode", newMode);
+  }
 
 }

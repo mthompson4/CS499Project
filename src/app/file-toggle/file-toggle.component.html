@@ -1,4 +1,5 @@
-<div class="list-group">
+<div class="list-group" align="center">
+<h3>File List</h3>
 <ul>
 	<li class="list-group-item list-group-item-action" *ngFor="let item of items | async" (click)="fileClicked(item.filename)">
 	   {{ item.filename }}
