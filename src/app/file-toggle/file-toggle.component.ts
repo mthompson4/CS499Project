@@ -21,7 +21,6 @@ export class FileToggleComponent{
 	}
 
 	fileClicked(filename){
-		console.log(filename);
 		this.events.publish('file:toggled', filename);
 	}
 }

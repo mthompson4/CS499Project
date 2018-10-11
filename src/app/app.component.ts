@@ -2,6 +2,7 @@ import { Component} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Events } from 'ionic-angular';
+import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 
@@ -12,10 +13,16 @@ import 'firebase/database';
 })
 export class AppComponent {
   ref: firebase.database.Reference;
-  constructor(private route: ActivatedRoute) {}
+  currentFileName = 'index.html';
+  constructor(
+    public events: Events
+  ) {
+    events.subscribe('file:toggled', (filename) => {
+      this.currentFileName = filename;
+    });
+   }
 
   ngOnInit(){
-    console.log(+this.route.snapshot.paramMap);
     const firebaseConfig = {
       apiKey: "AIzaSyAKULc7VqbYUHAAehKR0bDf42WRLyTKch0",
       authDomain: "test-project-5632e.firebaseapp.com",
@@ -25,6 +32,16 @@ export class AppComponent {
       messagingSenderId: "214812957898"
     }
     firebase.initializeApp(firebaseConfig);
+  }
+
+  saveClicked(){
+    this.events.publish('file:saved');
+  }
+
+  fileCreated(form : NgForm) {
+    // console.log('value', form.value["fileName"]);
+    let newFileName = form.value["fileName"];
+    this.events.publish('file:created', newFileName);
   }
 
 }

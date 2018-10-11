@@ -22,6 +22,7 @@ import 'codemirror/keymap/sublime.js';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css']
 })
+
 export class EditorComponent {
   @ViewChild(CodemirrorComponent) cm: CodemirrorComponent;
   currentFileName = 'index.html';
@@ -37,7 +38,6 @@ export class EditorComponent {
     keyMap: "sublime",
     lineNumbers: true
   };
-
   firepad;
   ref: firebase.database.Reference;
   currentFileRef: firebase.database.Reference;
@@ -50,6 +50,12 @@ export class EditorComponent {
     events.subscribe('file:toggled', (filename) => {
       this.changeFile(filename);
     });
+    events.subscribe('file:saved', () => {
+      this.saveToCloud();
+    });
+    events.subscribe('file:created', (filename) => {
+      this.createFile(filename);
+    });
    }
 
   ngAfterViewInit() {
@@ -58,7 +64,8 @@ export class EditorComponent {
     
     this.ref = firebase.database().ref();
     this.currentFileRef = this.ref.child('files').child('index');
-    this.firepad = Firepad.fromCodeMirror(this.currentFileRef, codemirrorInstance);
+    this.firepad = Firepad.fromCodeMirror(this.currentFileRef, codemirrorInstance,
+      { userId: 69});
 
     this.updateTimestamp();
   }
@@ -107,9 +114,7 @@ export class EditorComponent {
   }
 
   changeFile(filename){
-    console.log(filename);
     this.currentFileName = filename;
-    // document.getElementById('codemirrorElement').innerHTML = '';
     this.firepad.dispose();
     this.cm.setValue('');
     this.setFileInFirepad(filename);
@@ -119,7 +124,6 @@ export class EditorComponent {
   changeMode(filename) {
     let extension = filename.split('.')[1];
     var newMode;
-    console.log(extension);
     if(extension == 'html') {
       newMode = 'xml';
     }
@@ -134,8 +138,16 @@ export class EditorComponent {
       ...this.options,
       mode: newMode,
     };
-    console.log(this.options);
     this.cm.setOption("mode", newMode);
+  }
+
+  createFile(filename){
+    console.log("creating file", filename);
+    var databaseRef = firebase.database().ref().child('files').child(filename.split('.')[0]);
+    var postData = {
+      "filename": filename
+    };
+    databaseRef.set(postData);
   }
 
 }

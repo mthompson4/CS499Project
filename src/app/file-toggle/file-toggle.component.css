@@ -1,5 +1,12 @@
 .list-group {
-	position: absolute; left: 0; top: 120px; bottom: 0; height: auto;
+	position: absolute; 
+	left: 0; top: 120px; bottom: 0; 
+	height: auto;
     width: 175px;
     display:inline-block;
+}
+
+.file-group {
+	max-height: 200px;
+	overflow: scroll;
 }
