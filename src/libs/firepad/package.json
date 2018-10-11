@@ -1,0 +1,115 @@
+{
+  "_from": "firepad",
+  "_id": "firepad@1.5.0",
+  "_inBundle": false,
+  "_integrity": "sha1-Ony8DKnM0OcE9geRBGx+F7oQGZI=",
+  "_location": "/firepad",
+  "_phantomChildren": {
+    "@firebase/logger": "0.1.1",
+    "@firebase/webchannel-wrapper": "0.2.8",
+    "dom-storage": "2.1.0",
+    "isomorphic-fetch": "2.2.1",
+    "lodash": "4.17.10",
+    "nan": "2.10.0",
+    "promise-polyfill": "7.1.2",
+    "protobufjs": "5.0.3",
+    "websocket-driver": "0.7.0",
+    "whatwg-fetch": "2.0.4",
+    "xmlhttprequest": "1.8.0"
+  },
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "firepad",
+    "name": "firepad",
+    "escapedName": "firepad",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/firepad/-/firepad-1.5.0.tgz",
+  "_shasum": "3a7cbc0ca9ccd0e704f60791046c7e17ba101992",
+  "_spec": "firepad",
+  "_where": "/home/cmolina/code/markdown-editor",
+  "author": {
+    "name": "Firebase",
+    "url": "https://firebase.google.com/"
+  },
+  "browser": {
+    "jsdom": false
+  },
+  "bugs": {
+    "url": "https://github.com/firebase/firepad/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Michael Lehenbauer",
+      "email": "michael@firebase.com"
+    }
+  ],
+  "dependencies": {
+    "firebase": "^3 || ^4",
+    "jsdom": ">3"
+  },
+  "deprecated": false,
+  "description": "Collaborative text editing powered by Firebase",
+  "devDependencies": {
+    "coveralls": "^2.11.2",
+    "grunt": "~0.4.5",
+    "grunt-cli": "0.1.13",
+    "grunt-coffeelint": "0.0.7",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-concat": "~0.1.3",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-karma": "^2.0.0",
+    "jasmine-core": "^2.3.4",
+    "karma": "^2.0.2",
+    "karma-coverage": "^0.2.6",
+    "karma-failed-reporter": "0.0.2",
+    "karma-jasmine": "^1.1.2",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-spec-reporter": "0.0.13",
+    "monaco-editor": "^0.13.1"
+  },
+  "files": [
+    "dist/**",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
+  "homepage": "http://www.firepad.io/",
+  "keywords": [
+    "text",
+    "word",
+    "editor",
+    "firebase",
+    "realtime",
+    "collaborative"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://firebase.mit-license.org/"
+    }
+  ],
+  "main": "dist/firepad.min.js",
+  "name": "firepad",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firebase/firepad.git"
+  },
+  "scripts": {
+    "build": "grunt build",
+    "dev": "grunt watch",
+    "test": "grunt test",
+    "travis": "grunt"
+  },
+  "version": "1.5.0"
+}

@@ -1,1 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --active-color: #18c062;
+  --workspace-color: #eeeeee;
+}
+
+html {
+  box-sizing: border-box;
+  font-family: arial,sans-serif;
+  font-weight: normal;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+}
+
+.emoji {
+  filter: drop-shadow(0 0 0.15pt #a65200);
+  height: 1em;
+  position: relative;
+  top: .125em;
+}
