@@ -24,7 +24,8 @@ import 'codemirror/keymap/sublime.js';
 })
 
 export class EditorComponent {
-  @ViewChild(CodemirrorComponent) cm: CodemirrorComponent;
+  @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
+  cm: any;
   currentFileName = 'index.html';
   options = {
     mode: {
@@ -59,7 +60,7 @@ export class EditorComponent {
    }
 
   ngAfterViewInit() {
-    const codemirrorInstance = this.cm.instance;
+    const codemirrorInstance = this.codemirrorComponent.instance;
     this.cm = codemirrorInstance;
     
     this.ref = firebase.database().ref();
