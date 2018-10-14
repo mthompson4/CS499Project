@@ -6,6 +6,11 @@ import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 
+// #region External JS methods
+declare function showModalError(): any;
+declare function closeModal(): any;
+//#endregion
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -39,9 +44,15 @@ export class AppComponent {
   }
 
   fileCreated(form : NgForm) {
-    // console.log('value', form.value["fileName"]);
     let newFileName = form.value["fileName"];
-    this.events.publish('file:created', newFileName);
+    // check to see if filename was provided
+    if (newFileName.includes('.') == false){
+      showModalError();
+    }
+    else {
+      this.events.publish('file:created', newFileName);
+      closeModal()
+    }
   }
 
 }

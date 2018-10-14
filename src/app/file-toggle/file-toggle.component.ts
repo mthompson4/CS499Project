@@ -3,6 +3,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { Observable } from 'rxjs';
 import { ActivatedRoute, Router, Event } from '@angular/router';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'file-toggle',
@@ -11,16 +12,24 @@ import { ActivatedRoute, Router, Event } from '@angular/router';
 })
 
 export class FileToggleComponent{
-	items: Observable<any[]>;
+	files: Observable<any[]>;
 	constructor(
 		db: AngularFireDatabase, 
 		public events: Events,
 		private router: Router
 	) {
-		this.items = db.list('files').valueChanges();
+		this.files = db.list('files').snapshotChanges().pipe(map(items => {            // <== new way of chaining
+    		return items.map(a => {
+      			const data = a.payload.val();
+      			const key = a.payload.key;
+      			return {key, data};          
+      		});
+    	}));
 	}
 
-	fileClicked(filename){
-		this.events.publish('file:toggled', filename);
+	fileClicked(file){
+		let filename = file.data["filename"];
+		let filekey = file.key;
+		this.events.publish('file:toggled', filename, filekey);
 	}
 }

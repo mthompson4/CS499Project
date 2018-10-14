@@ -27,6 +27,7 @@ export class EditorComponent {
   @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
   cm: any;
   currentFileName = 'index.html';
+  currentFileKey = 'index';
   options = {
     mode: {
       name: 'xml',
@@ -48,8 +49,8 @@ export class EditorComponent {
     private route: ActivatedRoute,
     public events: Events
   ) {
-    events.subscribe('file:toggled', (filename) => {
-      this.changeFile(filename);
+    events.subscribe('file:toggled', (filename, filekey) => {
+      this.changeFile(filename, filekey);
     });
     events.subscribe('file:saved', () => {
       this.saveToCloud();
@@ -64,16 +65,15 @@ export class EditorComponent {
     this.cm = codemirrorInstance;
     
     this.ref = firebase.database().ref();
-    this.currentFileRef = this.ref.child('files').child('index');
+    this.currentFileRef = this.ref.child('files').child(this.currentFileKey);
     this.firepad = Firepad.fromCodeMirror(this.currentFileRef, codemirrorInstance,
       { userId: 69});
 
     this.updateTimestamp();
   }
 
-  setFileInFirepad(filename){
-    let key = filename.split('.')[0];
-    this.currentFileRef = this.ref.child('files').child(key);
+  setFileInFirepad(filekey){
+    this.currentFileRef = this.ref.child('files').child(filekey);
     this.firepad = Firepad.fromCodeMirror(this.currentFileRef, this.cm);
   }
 
@@ -114,16 +114,20 @@ export class EditorComponent {
     })
   }
 
-  changeFile(filename){
+  // changes the file in the editor
+  changeFile(filename, filekey){
     this.currentFileName = filename;
+    this.currentFileKey = filekey;
     this.firepad.dispose();
     this.cm.setValue('');
-    this.setFileInFirepad(filename);
+    this.setFileInFirepad(filekey);
     this.changeMode(filename);
   }
 
+  // change the mode to the provided syntax highlighting mode
   changeMode(filename) {
-    let extension = filename.split('.')[1];
+    let splitArray = filename.split('.'); // splits the filename into tokens delimited by .
+    let extension = splitArray[splitArray.length - 1]; // get the last token in the array
     var newMode;
     if(extension == 'html') {
       newMode = 'xml';
@@ -142,13 +146,14 @@ export class EditorComponent {
     this.cm.setOption("mode", newMode);
   }
 
+  // creates the file in the firebase database
   createFile(filename){
     console.log("creating file", filename);
-    var databaseRef = firebase.database().ref().child('files').child(filename.split('.')[0]);
+    var databaseRef = firebase.database().ref().child('files');
     var postData = {
       "filename": filename
     };
-    databaseRef.set(postData);
+    databaseRef.push().set(postData);
   }
 
 }

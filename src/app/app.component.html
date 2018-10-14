@@ -84,8 +84,13 @@
               <input class="form-control" type="text" name="fileName" ngModel id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter File Name">
               <small id="emailHelp" class="form-text text-muted">Please be sure to include the file extension (ex: .html, .py, .js)</small>
              </div>
-             <button type="submit" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+             <div id="newFileModalError" class="alert alert-danger invisible" role="alert">
+              No file extension found.
+            </div>
+            <div class="modal-footer">
+             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
              <button type="submit" class="btn btn-primary">Add</button>
+            </div>
           </form>
           </div>
         </div>
