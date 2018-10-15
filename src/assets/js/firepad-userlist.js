@@ -11,7 +11,7 @@ var FirepadUserList = (function() {
 
     var self = this;
     this.hasName_ = !!displayName;
-    this.displayName_ = displayName || 'Guest ' + Math.floor(Math.random() * 1000);
+    this.displayName_ = displayName || 'Guest ' + this.userId_;
     this.firebaseOn_(ref.root.child('.info/connected'), 'value', function(s) {
       if (s.val() === true && self.displayName_) {
         var nameRef = ref.child(self.userId_).child('name');

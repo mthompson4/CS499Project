@@ -43,6 +43,10 @@ export class AppComponent {
     this.events.publish('file:saved');
   }
 
+  renderFile(){
+    this.events.publish('file:rendered');
+  }
+
   fileCreated(form : NgForm) {
     let newFileName = form.value["fileName"];
     // check to see if filename was provided
