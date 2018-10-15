@@ -30,7 +30,7 @@
               "src/assets/css/firepad-userlist.css"
             ],
             "scripts": [
-              "src/assets/js/firepad-init.js",
+              "src/assets/js/js_helpers.js",
               "src/assets/js/firepad-userlist.js"
             ]
           },
