@@ -8,15 +8,23 @@ import 'firebase/storage';
 import { CodemirrorComponent } from 'ng2-codemirror';
 import * as Firepad from '../../libs/firepad/dist/firepad';
 
+// Import syntax highlighting modes
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/xml/xml';
 import 'codemirror/mode/python/python';
+import 'codemirror/mode/php/php';
+
 import 'codemirror/addon/edit/closetag.js';
 import 'codemirror/addon/comment/comment.js';
+import 'codemirror/addon/fold/xml-fold.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/edit/matchtags.js';
 import 'codemirror/keymap/sublime.js';
 
 declare var FirepadUserList: any;
+declare function matchExtension(extension): any;
 
 @Component({
   selector: 'code-editor',
@@ -38,6 +46,9 @@ export class EditorComponent {
     theme: 'default',
     lineWrapping: true,
     autoCloseTags: true,
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    matchTags: {bothTags: true},
     keyMap: "sublime",
     lineNumbers: true
   };
@@ -147,16 +158,7 @@ export class EditorComponent {
   changeMode(filename) {
     let splitArray = filename.split('.'); // splits the filename into tokens delimited by .
     let extension = splitArray[splitArray.length - 1]; // get the last token in the array
-    var newMode;
-    if(extension == 'html') {
-      newMode = 'xml';
-    }
-    else if(extension == 'js'){
-      newMode = 'javascript';
-    }
-    else if(extension == 'py'){
-      newMode = 'python';
-    }
+    var newMode = matchExtension(extension);
     this.options = {
       ...this.options,
       mode: newMode,
