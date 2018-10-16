@@ -1,16 +1,15 @@
 const express = require('express');
+const http = require('http');
 const app = express();
 var path = require('path');
 
-// define paths for node modules & external JS / CSS files
-app.use(express.static(__dirname + '/static'));
-app.use(express.static(__dirname + '/src'));
-app.use(express.static(__dirname + '/dist'));
+app.use(express.static(__dirname + '/dist/CS499Project'));
 
-app.route('/').get((req, res) => {
-	res.sendFile(path.join(__dirname+'/dist/CS499Project/index.html'));
-})
+app.get('/*', (req, res) => res.sendFile(path.join(__dirname)));
 
-app.listen(8080, () => {
-	console.log('Server Started!');
-})
+const server = app.listen(8080, () => {
+	const host = server.address().address;
+	const port = server.address().port;
+
+	console.log(`Example app listening at http://${host}:${port}`);
+});

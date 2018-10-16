@@ -21,9 +21,13 @@
     }
 
     #userlist {
-      position: absolute; left: 0; top: 112px; bottom: 0; height: auto;
+      position: absolute; left: 0; top: 300px; bottom: 0; height: auto;
       width: 175px;
     }
     #firepad {
       position: absolute; left: 175px; top: 112px; bottom: 0; right: 0; height: auto;
+    }
+
+    .btn{
+      margin-left:10px;
     }

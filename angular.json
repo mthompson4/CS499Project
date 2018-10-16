@@ -4,7 +4,7 @@
   "newProjectRoot": "projects",
   "projects": {
     "CS499Project": {
-      "root": "src",
+      "root": "",
       "sourceRoot": "src",
       "projectType": "application",
       "prefix": "app",
@@ -24,10 +24,13 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/assets/css/firepad-userlist.css",
+              "node_modules/highlight.js/styles/github.css",
+              "node_modules/codemirror/lib/codemirror.css",
+              "src/libs/firepad/dist/firepad.css",
+              "src/assets/css/firepad-userlist.css"
             ],
             "scripts": [
-              "src/assets/js/firepad-init.js",
+              "src/assets/js/js_helpers.js",
               "src/assets/js/firepad-userlist.js"
             ]
           },

@@ -1,0 +1,8 @@
+<div class="file-toggler" align="center">
+<h3>File List</h3>
+<ul class="list-group file-group">
+	<li class="list-group-item list-group-item-action" *ngFor="let file of files | async" (click)="fileClicked(file)">
+		<strong>{{ file.data["filename"] }}</strong>
+	</li>
+</ul>
+</div>
