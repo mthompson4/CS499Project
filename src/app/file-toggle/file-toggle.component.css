@@ -1,12 +1,12 @@
 .file-toggler {
 	position: absolute; 
-	left: 0; top: 120px; bottom: 0; 
-	height: 150px;
+	left: 0; top: 58px; bottom: 0; 
+	height: 300px;
     width: 175px;
     display:inline-block;
 }
 
 .file-group {
-	max-height: 150px;
+	max-height: 300px;
 	overflow: scroll;
 }
