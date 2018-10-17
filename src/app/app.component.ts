@@ -9,6 +9,7 @@ import 'firebase/database';
 // #region External JS methods
 declare function showModalError(): any;
 declare function closeModal(): any;
+declare function collapseSidebar(collapse): any;
 //#endregion
 
 @Component({
@@ -19,6 +20,7 @@ declare function closeModal(): any;
 export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = 'index.html';
+  isCollapsed = false;
   constructor(
     public events: Events
   ) {
@@ -57,6 +59,11 @@ export class AppComponent {
       this.events.publish('file:created', newFileName);
       closeModal()
     }
+  }
+
+  collapse(){
+    collapseSidebar(this.isCollapsed);
+    this.isCollapsed = !this.isCollapsed;
   }
 
 }

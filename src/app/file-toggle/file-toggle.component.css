@@ -10,3 +10,9 @@
 	max-height: 300px;
 	overflow: scroll;
 }
+
+.list-group-item {
+	height: 30px;
+	padding: 3px 10px;
+	font-size: 12px;
+}
