@@ -37,8 +37,8 @@ declare function matchExtension(extension): any;
 export class EditorComponent {
   @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
   cm: any;
-  currentFileName = 'index.html';
-  currentFileKey = 'index';
+  currentFileName;
+  currentFileKey;
   options = {
     mode: {
       name: 'xml',
@@ -81,16 +81,17 @@ export class EditorComponent {
     events.subscribe('color:switched', (wasNightMode) => {
       this.changeTheme(wasNightMode);
     });
+
+    events.subscribe('file:deleted', () => {
+      this.deleteFile();
+    });
    }
 
   ngAfterViewInit() {
     const codemirrorInstance = this.codemirrorComponent.instance;
     this.cm = codemirrorInstance;
-    
     this.ref = firebase.database().ref();
-    this.currentFileRef = this.ref.child('files').child(this.currentFileKey);
-    this.userId = Math.floor(Math.random() * 9999).toString();
-    this.setFileInFirepad(this.currentFileKey);
+    this.initLoadFile();
   }
 
   setFileInFirepad(filekey){
@@ -171,6 +172,7 @@ export class EditorComponent {
     this.cm.setOption("mode", newMode);
   }
 
+  // change the editor theme
   changeTheme(wasNightMode){
     var newTheme;
     if(wasNightMode){
@@ -188,12 +190,11 @@ export class EditorComponent {
 
   // creates the file in the firebase database
   createFile(filename){
-    console.log("creating file", filename);
-    var databaseRef = firebase.database().ref().child('files');
+    console.log('creating file');
     var postData = {
       "filename": filename
     };
-    var fileRef = databaseRef.push();
+    var fileRef = this.ref.child('files').push();
     fileRef.set(postData);
     this.currentFileName = filename;
     this.currentFileKey = fileRef.key;
@@ -201,4 +202,49 @@ export class EditorComponent {
     this.changeFile(filename, fileRef.key);
   }
 
+  deleteFile(){
+    this.currentFileRef.remove();
+    var self = this;
+    this.ref.child('files').once('value').then(function(dataSnapshot) {
+      if(dataSnapshot.val() == null) {
+        self.createFile('untitled');
+        self.events.publish('filename:updated', 'untitled');
+      }
+      else{
+        dataSnapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          let key  = childSnapshot.key;
+          self.events.publish('filename:updated', item['filename']);
+          self.changeFile(item['filename'], key);
+          return true;
+      });
+      }
+    });
+  }
+
+  initLoadFile(){
+    var self = this;
+    this.ref.child('files').once('value').then(function(dataSnapshot) {
+      if(dataSnapshot.val() == null) {
+        self.createFile('untitled');
+        self.events.publish('filename:updated', 'untitled');
+      }
+      else{
+        dataSnapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          let key  = childSnapshot.key;
+          self.currentFileKey = key;
+          self.currentFileName = item['filename'];
+          self.events.publish('filename:updated', item['filename']);
+          self.currentFileRef = self.ref.child('files').child(self.currentFileKey);
+          self.userId = Math.floor(Math.random() * 9999).toString();
+          self.setFileInFirepad(self.currentFileKey);
+          return true;
+      });
+      }
+    });
+  }
 }
+
+
+

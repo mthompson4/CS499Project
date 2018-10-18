@@ -20,13 +20,16 @@ declare function toggleClass(isNightMode): any;
 })
 export class AppComponent {
   ref: firebase.database.Reference;
-  currentFileName = 'index.html';
+  currentFileName = '';
   isCollapsed = false;
   isNightMode = true;
   constructor(
     public events: Events
   ) {
     events.subscribe('file:toggled', (filename) => {
+      this.currentFileName = filename;
+    });
+    events.subscribe('filename:updated', (filename) => {
       this.currentFileName = filename;
     });
    }
@@ -72,6 +75,10 @@ export class AppComponent {
     this.events.publish('color:switched', this.isNightMode);
     toggleClass(this.isNightMode);
     this.isNightMode = !(this.isNightMode);
+  }
+
+  deleteFile(){
+    this.events.publish('file:deleted');
   }
 
 }
