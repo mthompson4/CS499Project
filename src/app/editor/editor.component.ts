@@ -15,6 +15,7 @@ import 'codemirror/mode/xml/xml';
 import 'codemirror/mode/python/python';
 import 'codemirror/mode/php/php';
 
+// Codemirror addons
 import 'codemirror/addon/edit/closetag.js';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/fold/xml-fold.js';
@@ -23,6 +24,7 @@ import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/matchtags.js';
 import 'codemirror/keymap/sublime.js';
 
+// external JS functions
 declare var FirepadUserList: any;
 declare function matchExtension(extension): any;
 
@@ -43,14 +45,14 @@ export class EditorComponent {
     },
     tabSize: 2,
     autofocus: true,
-    theme: 'default',
+    theme: 'monokai',
     lineWrapping: true,
     autoCloseTags: true,
     autoCloseBrackets: true,
     matchBrackets: true,
     matchTags: {bothTags: true},
     keyMap: "sublime",
-    lineNumbers: true
+    lineNumbers: true,
   };
   firepad;
   ref: firebase.database.Reference;
@@ -76,6 +78,9 @@ export class EditorComponent {
       this.serveFile();
     });
 
+    events.subscribe('color:switched', (wasNightMode) => {
+      this.changeTheme(wasNightMode);
+    });
    }
 
   ngAfterViewInit() {
@@ -164,6 +169,21 @@ export class EditorComponent {
       mode: newMode,
     };
     this.cm.setOption("mode", newMode);
+  }
+
+  changeTheme(wasNightMode){
+    var newTheme;
+    if(wasNightMode){
+      newTheme="default";
+    }
+    else {
+      newTheme="monokai";
+    }
+    this.options = {
+      ...this.options,
+      theme: newTheme,
+    };
+    this.cm.setOption("theme", newTheme);
   }
 
   // creates the file in the firebase database

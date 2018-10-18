@@ -7,7 +7,7 @@
 }
 
 .file-group {
-	max-height: 300px;
+	max-height: 267px;
 	overflow: scroll;
 }
 
@@ -15,4 +15,9 @@
 	height: 30px;
 	padding: 3px 10px;
 	font-size: 12px;
+}
+
+#file-list-group li:hover{
+    border: 2px solid #000;
+    padding: 0 18px 2px 18px;
 }

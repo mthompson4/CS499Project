@@ -10,6 +10,7 @@ import 'firebase/database';
 declare function showModalError(): any;
 declare function closeModal(): any;
 declare function collapseSidebar(collapse): any;
+declare function toggleClass(isNightMode): any;
 //#endregion
 
 @Component({
@@ -21,6 +22,7 @@ export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = 'index.html';
   isCollapsed = false;
+  isNightMode = true;
   constructor(
     public events: Events
   ) {
@@ -64,6 +66,12 @@ export class AppComponent {
   collapse(){
     collapseSidebar(this.isCollapsed);
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  setColorMode(){
+    this.events.publish('color:switched', this.isNightMode);
+    toggleClass(this.isNightMode);
+    this.isNightMode = !(this.isNightMode);
   }
 
 }

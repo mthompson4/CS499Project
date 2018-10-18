@@ -13,6 +13,7 @@ import { map } from 'rxjs/operators';
 
 export class FileToggleComponent{
 	files: Observable<any[]>;
+	isNightMode = true;
 	constructor(
 		db: AngularFireDatabase, 
 		public events: Events,
@@ -25,6 +26,10 @@ export class FileToggleComponent{
       			return {key, data};          
       		});
     	}));
+
+    	events.subscribe('color:switched', (toMode) => {
+      		this.isNightMode = !(this.isNightMode);
+    	});
 	}
 
 	fileClicked(file){

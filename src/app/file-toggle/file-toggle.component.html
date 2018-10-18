@@ -1,8 +1,17 @@
-<div class="file-toggler" align="center">
+<div class="file-toggler bg-dark text-white" align="center">
 <h3>File List</h3>
-<ul class="list-group file-group">
-	<li class="list-group-item list-group-item-action border-0" *ngFor="let file of files | async" (click)="fileClicked(file)">
-		<img src="/assets/open-iconic/svg/document.svg"><span> {{ file.data["filename"] }}</span>
+<ul id="file-list-group" class="list-group file-group">
+	<ng-container *ngIf="isNightMode">
+	<li class="list-group-item list-group-item-action border-0 bg-dark text-white" *ngFor="let file of files | async" (click)="fileClicked(file)">
+		<span class="octicon octicon-file-code"></span>
+		<span> {{ file.data["filename"] }}</span>
 	</li>
+	</ng-container>
+	<ng-container *ngIf="!isNightMode">
+	<li class="list-group-item list-group-item-action border-0" *ngFor="let file of files | async" (click)="fileClicked(file)">
+		<span class="octicon octicon-file-code"></span>
+		<span> {{ file.data["filename"] }}</span>
+	</li>
+	</ng-container>
 </ul>
 </div>
