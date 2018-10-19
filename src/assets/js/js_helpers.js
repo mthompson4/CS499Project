@@ -1,10 +1,22 @@
 function closeModal(){
-	$('#newFileModal').modal('hide')
+	$('#newFileModal').modal('hide');
+	$('#newFileModal').on('hidden.bs.modal', function () {
+    $(this).find('form').trigger('reset');
+	});
 }
 
-function showModalError(){
+function showModalError(message){
 	$('#newFileModalError').removeClass('invisible');
+	$('#newFileModalError').html(message);
 }
+
+
+function filenameEditor(){
+	document.getElementById("fileNameLabel").classList.toggle("hidden");
+	document.getElementById("editInput").classList.toggle("hidden");
+}
+
+
 
 function matchExtension(inputExtension){
 	let modes = {

@@ -30,11 +30,6 @@ export class FileToggleComponent{
     	events.subscribe('color:switched', (toMode) => {
       		this.isNightMode = !(this.isNightMode);
     	});
-
-    	// events.subscribe('file:deletedEditor', () => {
-     //  		this.sendFileToLoad();
-    	// });
-
 	}
 
 	// send the file to the editor that was just clicked in the filelist
@@ -43,23 +38,4 @@ export class FileToggleComponent{
 		let filekey = file.key;
 		this.events.publish('file:toggled', filename, filekey);
 	}
-
-	// pick the first file in the file list to load
-	// sendFileToLoad(){
-	// 	let fileToSend = this.files[0];
-	// 	let filename = fileToSend.data["filename"];
-	// 	let filekey = fileToSend.key;
-	// 	this.events.publish('file:loaded', filename, filekey);
-	// }
-
-	// pick the first file in the file list to load
-	sendFileToLoad(){
-		console.log(this.files);
-		this.files.subscribe(filelist => {
-			console.log(filelist[0]);
-			let fileToSend = filelist[0];
-			this.fileClicked(fileToSend);
-		});
-	}
-
 }

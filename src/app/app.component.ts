@@ -7,8 +7,9 @@ import * as firebase from 'firebase/app';
 import 'firebase/database';
 
 // #region External JS methods
-declare function showModalError(): any;
+declare function showModalError(message): any;
 declare function closeModal(): any;
+declare function filenameEditor(): any;
 declare function collapseSidebar(collapse): any;
 declare function toggleClass(isNightMode): any;
 //#endregion
@@ -44,6 +45,8 @@ export class AppComponent {
       messagingSenderId: "214812957898"
     }
     firebase.initializeApp(firebaseConfig);
+    this.ref = firebase.database().ref();
+    this.editFileName();
   }
 
   saveClicked(){
@@ -58,11 +61,29 @@ export class AppComponent {
     let newFileName = form.value["fileName"];
     // check to see if filename was provided
     if (newFileName.includes('.') == false){
-      showModalError();
+      showModalError("Please enter a file extension");
     }
     else {
-      this.events.publish('file:created', newFileName);
-      closeModal()
+       var self = this;
+       var isDuplicate = false;
+       // check the file list to ensure no duplicate filenames
+       this.ref.child('files').once('value').then(function(dataSnapshot) {
+         dataSnapshot.forEach(function(childSnapshot) {
+         var item = childSnapshot.val();
+         var currFileName = item["filename"];
+         if(currFileName.toLowerCase() == newFileName.toLowerCase()){
+           isDuplicate = true;
+           return true;
+         }
+        });
+        if (isDuplicate) {
+          showModalError("Filename already exists!");
+        }
+        else {
+          self.events.publish('file:created', newFileName);
+          closeModal();
+        }
+      });
     }
   }
 
@@ -81,4 +102,21 @@ export class AppComponent {
     this.events.publish('file:deleted');
   }
 
+  editFileName(){
+    var fileLabel = document.getElementById("fileNameLabel");
+    var inputArea = document.getElementById("editInput") as HTMLInputElement;
+    var self = this;
+    fileLabel.addEventListener("click", function(){
+      fileLabel.classList.toggle("hidden");
+      inputArea.classList.toggle("hidden");
+    });
+    inputArea.addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        console.log(inputArea.value);
+        self.currentFileName = inputArea.value;
+        inputArea.classList.toggle("hidden");
+        fileLabel.classList.toggle("hidden");
+        }
+     });
+  }
 }

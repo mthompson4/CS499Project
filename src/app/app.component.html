@@ -3,7 +3,10 @@
         <a class="navbar-brand" href="#">
           <img src="/assets/img/logo.png" width="40" height="30" alt="">
         </a>
-        <span class="navbar-brand"><strong>{{ currentFileName }}</strong></span>
+        <div id="editFileName" class="col-xs-1">
+          <span id="fileNameLabel" class="navbar-brand"><strong>{{ currentFileName }}</strong></span>
+          <input class="form-control hidden" id="editInput" type="text" value="{{ currentFileName }}">
+        </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -73,8 +76,8 @@
            <form (ngSubmit)="fileCreated(f)" #f="ngForm" class="jumbotron bg-dark text-white">
              <div class="form-group bg-dark text-white">
               <label for="exampleFileName">File Name</label>
-              <input class="form-control bg-dark text-white" type="text" name="fileName" ngModel id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter File Name">
-              <small id="emailHelp" class="form-text text-muted bg-dark text-white">Please be sure to include the file extension (ex: .html, .py, .js)</small>
+              <input id="fileInput" class="form-control bg-dark text-white" type="text" name="fileName" ngModel aria-describedby="fileHelp" placeholder="Enter File Name">
+              <small id="fileHelp" class="form-text text-muted bg-dark text-white">Please be sure to include the file extension (ex: .html, .py, .js)</small>
              </div>
              <div id="newFileModalError" class="alert alert-danger invisible" role="alert">
               No file extension found.
