@@ -21,7 +21,7 @@ import { EditorComponent } from './editor/editor.component';
   ],
   imports: [
     BrowserModule,
-    AngularFireModule.initializeApp(environment.firebase, 'test-project'),
+    AngularFireModule.initializeApp(environment.firebaseConfig, 'cs499-team-4'),
     AngularFireDatabaseModule,
     CodemirrorModule,
     AppRoutingModule,

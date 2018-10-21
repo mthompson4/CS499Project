@@ -22,28 +22,32 @@ declare function toggleClass(isNightMode): any;
 export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = '';
+  currentFileKey = '';
   isCollapsed = false;
   isNightMode = true;
   constructor(
     public events: Events
   ) {
-    events.subscribe('file:toggled', (filename) => {
+    events.subscribe('file:toggled', (filename, filekey) => {
       this.currentFileName = filename;
+      this.currentFileKey = filekey;
     });
-    events.subscribe('filename:updated', (filename) => {
+    events.subscribe('filename:updated', (filename, filekey) => {
       this.currentFileName = filename;
+      this.currentFileKey = filekey;
     });
    }
 
   ngOnInit(){
-    const firebaseConfig = {
-      apiKey: "AIzaSyAKULc7VqbYUHAAehKR0bDf42WRLyTKch0",
-      authDomain: "test-project-5632e.firebaseapp.com",
-      databaseURL: "https://test-project-5632e.firebaseio.com",
-      projectId: "test-project-5632e",
-      storageBucket: "test-project-5632e.appspot.com",
-      messagingSenderId: "214812957898"
-    }
+    var firebaseConfig = {
+      apiKey: "AIzaSyASvevZqe3FQvDIsdFmE3KeCRvKMBXffjU",
+      authDomain: "cs499-team-4.firebaseapp.com",
+      databaseURL: "https://cs499-team-4.firebaseio.com",
+      projectId: "cs499-team-4",
+      storageBucket: "files.cloud-code.net",
+      messagingSenderId: "824045995979"
+    };
+
     firebase.initializeApp(firebaseConfig);
     this.ref = firebase.database().ref();
     this.editFileName();
@@ -70,11 +74,14 @@ export class AppComponent {
        this.ref.child('files').once('value').then(function(dataSnapshot) {
          dataSnapshot.forEach(function(childSnapshot) {
          var item = childSnapshot.val();
-         var currFileName = item["filename"];
-         if(currFileName.toLowerCase() == newFileName.toLowerCase()){
-           isDuplicate = true;
-           return true;
-         }
+         console.log(item);
+         if(item["filename"] != undefined){
+           var currFileName = item["filename"];
+           if(currFileName.toLowerCase() == newFileName.toLowerCase()){
+             isDuplicate = true;
+             return true;
+            }
+           }
         });
         if (isDuplicate) {
           showModalError("Filename already exists!");
@@ -112,10 +119,35 @@ export class AppComponent {
     });
     inputArea.addEventListener("keyup", function(event) {
       if (event.key === "Enter") {
-        console.log(inputArea.value);
-        self.currentFileName = inputArea.value;
-        inputArea.classList.toggle("hidden");
-        fileLabel.classList.toggle("hidden");
+        let previousFileName = self.currentFileName;
+        let newFileName = inputArea.value
+        var isDuplicate = false;
+        // self.currentFileName = inputArea.value;
+        self.ref.child('files').once('value').then(function(dataSnapshot) {
+          dataSnapshot.forEach(function(childSnapshot) {
+            var item = childSnapshot.val();
+            if(item["filename"] != undefined){
+              var currFileName = item["filename"];
+                if(currFileName.toLowerCase() == newFileName.toLowerCase()){
+                  isDuplicate = true;
+                  return true;
+                }
+            }
+          });
+          if (isDuplicate) {
+            alert("Filename already exists! Please choose a different filename.");
+            inputArea.classList.toggle("hidden");
+            fileLabel.classList.toggle("hidden");
+          }
+          else {
+            var updateValues = {"filename": inputArea.value};
+            self.ref.child("files").child(self.currentFileKey).update(updateValues);
+            self.events.publish('filename:edited', previousFileName, newFileName);
+            inputArea.classList.toggle("hidden");
+            fileLabel.classList.toggle("hidden");
+            self.currentFileName = newFileName;
+          }
+        });
         }
      });
   }

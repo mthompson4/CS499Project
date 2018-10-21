@@ -1,7 +1,7 @@
 function closeModal(){
 	$('#newFileModal').modal('hide');
 	$('#newFileModal').on('hidden.bs.modal', function () {
-    $(this).find('form').trigger('reset');
+    	$(this).find('form').trigger('reset');
 	});
 }
 
@@ -17,16 +17,15 @@ function filenameEditor(){
 }
 
 
-
 function matchExtension(inputExtension){
 	let modes = {
 		'html': 'xml',
 		'js': 'javascript',
 		'py': 'python',
 		'md': 'markdown',
-		'php': 'php'
+		'php': 'php',
+		'css': 'css'
 	}
-	console.log(modes[inputExtension]);
 	return modes[inputExtension];
 }
 
@@ -60,8 +59,10 @@ function toggleClass(isNightMode){
 	var dropdown_menus = document.body.getElementsByClassName('dropdown-menu');
 	var file_toggler = document.body.getElementsByClassName('file-toggler');
 	let userList = document.getElementById("userlist");
-	
-	let elements_to_change = [...dropdown_items, ...dropdown_menus, ...file_toggler];
+	let modal_items = document.getElementById('newFileModal').getElementsByClassName('bg-dark');
+	console.log(modal_items);
+
+	let elements_to_change = [...dropdown_items, ...dropdown_menus, ...file_toggler, ...modal_items];
 	console.log(elements_to_change);
 	for(var i = 0; i < elements_to_change.length; ++i){
 		elements_to_change[i].classList.toggle("bg-dark");
@@ -69,6 +70,5 @@ function toggleClass(isNightMode){
 	}
 	userList.classList.toggle("bg-dark");
 	userList.classList.toggle("text-white");
-
 
 }
