@@ -1,12 +1,23 @@
 .file-toggler {
 	position: absolute; 
-	left: 0; top: 120px; bottom: 0; 
-	height: 150px;
+	left: 0; top: 58px; bottom: 0; 
+	height: 300px;
     width: 175px;
     display:inline-block;
 }
 
 .file-group {
-	max-height: 150px;
+	max-height: 267px;
 	overflow: scroll;
+}
+
+.list-group-item {
+	height: 30px;
+	padding: 3px 10px;
+	font-size: 12px;
+}
+
+#file-list-group li:hover{
+    border: 2px solid #000;
+    padding: 0 18px 2px 18px;
 }

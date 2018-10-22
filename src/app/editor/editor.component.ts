@@ -14,7 +14,9 @@ import 'codemirror/mode/markdown/markdown';
 import 'codemirror/mode/xml/xml';
 import 'codemirror/mode/python/python';
 import 'codemirror/mode/php/php';
+import 'codemirror/mode/css/css';
 
+// Codemirror addons
 import 'codemirror/addon/edit/closetag.js';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/fold/xml-fold.js';
@@ -23,6 +25,7 @@ import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/matchtags.js';
 import 'codemirror/keymap/sublime.js';
 
+// external JS functions
 declare var FirepadUserList: any;
 declare function matchExtension(extension): any;
 
@@ -35,38 +38,42 @@ declare function matchExtension(extension): any;
 export class EditorComponent {
   @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
   cm: any;
-  currentFileName = 'index.html';
-  currentFileKey = 'index';
+  currentFileName;
+  currentFileKey;
   options = {
     mode: {
       name: 'xml',
     },
     tabSize: 2,
     autofocus: true,
-    theme: 'default',
+    theme: 'monokai',
     lineWrapping: true,
     autoCloseTags: true,
     autoCloseBrackets: true,
     matchBrackets: true,
     matchTags: {bothTags: true},
     keyMap: "sublime",
-    lineNumbers: true
+    lineNumbers: true,
   };
   firepad;
   ref: firebase.database.Reference;
   currentFileRef: firebase.database.Reference;
   userId;
 
+   /**
+   * Represents the text editor class
+   * @constructor
+   * @param {events}: Events - A reference to a component handling Angular events
+  */
   constructor(
-  	private router: Router,
-    private route: ActivatedRoute,
     public events: Events
   ) {
+    // define the events to subscribe to and the code the fires on those events
     events.subscribe('file:toggled', (filename, filekey) => {
       this.changeFile(filename, filekey);
     });
     events.subscribe('file:saved', () => {
-      this.saveToCloud();
+      this.saveToCloud(this.currentFileName);
     });
     events.subscribe('file:created', (filename) => {
       this.createFile(filename);
@@ -76,18 +83,35 @@ export class EditorComponent {
       this.serveFile();
     });
 
+    events.subscribe('color:switched', (wasNightMode) => {
+      this.changeTheme(wasNightMode);
+    });
+
+    events.subscribe('file:deleted', () => {
+      this.deleteFromDatabase();
+    });
+
+    events.subscribe('filename:edited', (oldFileName, newFileName) => {
+      // this.currentFileName = newFileName;
+      this.updateFileInCloud(oldFileName, newFileName);
+      this.changeMode(newFileName);
+    });
    }
 
+  /* Code executes after the view inits: sets global objects and loads a file to the editor*/
   ngAfterViewInit() {
+    // set the codemirror instance
     const codemirrorInstance = this.codemirrorComponent.instance;
     this.cm = codemirrorInstance;
-    
     this.ref = firebase.database().ref();
-    this.currentFileRef = this.ref.child('files').child(this.currentFileKey);
-    this.userId = Math.floor(Math.random() * 9999).toString();
-    this.setFileInFirepad(this.currentFileKey);
+    // choose a file to load in the editor at default
+    this.initLoadFile();
   }
 
+  /**
+   * Sets a firepad listener to the current file and updates the userlist
+   * @param {filekey}: String - A reference the current file's identifying key
+  */
   setFileInFirepad(filekey){
     console.log(this.userId);
     document.getElementById('userlist').innerHTML = '';
@@ -97,28 +121,52 @@ export class EditorComponent {
     this.updateTimestamp();
   }
 
+
+  matchMimeType(inputFilename){
+    let splitArray = inputFilename.split('.'); // splits the filename into tokens delimited by .
+    let extension = splitArray[splitArray.length - 1]; // get the last token in the array
+    let mimeTypes = {
+      'html': 'text/html',
+      'js': 'application/javascript',
+      'py': 'text/python',
+      'md': 'text/markdown',
+      'php': 'text/php',
+      'css': 'text/css',
+      'txt': 'text/plain'
+    }
+    let type = mimeTypes[extension];
+    if(type != undefined){
+      return type
+    }
+    else {
+      return 'text/plain';
+    }
+  }
+
   // Save a file to the cloud and update the save timestamp
-  saveToCloud(){
-    // const storageRef = FirebaseApp.storage().ref()
-    console.log(this.currentFileKey);
-    var storageRef = firebase.storage().ref();
+  saveToCloud(filename){
     // grab the timestamp element
     var saveTimestampElement = document.getElementById('saveTimestamp');
     saveTimestampElement.innerHTML = 'Saving......';
-    
+    var storageRef = firebase.storage().ref().child('files');
     // get the firebase storage ref
-    var testRef = storageRef.child(this.currentFileName);
+    var fileRef = storageRef.child(filename);
     // grab the contents of the editor as a string
+    // TODO: match up the mime types based on the filetype
+    let mimeType = this.matchMimeType(filename);
     var message = this.firepad.getText();
+    var myblob = new Blob([message], {
+        type: mimeType
+    });
     // putString saves the file to firebase storage
     var self = this;
-    testRef.putString(message).then(function(snapshot) {
+    fileRef.put(myblob).then(function(snapshot) {
       // grab the current timestamp
       let date = new Date();
       let saveTimestamp = date.toLocaleTimeString();
       saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
       // set the ref in the firebase database with the timestamp
-      var databaseRef = firebase.database().ref().child('/save').child(self.currentFileKey);
+      var databaseRef = firebase.database().ref().child('save').child(self.currentFileKey);
       var postData = {
         "Timestamp": saveTimestamp
       };
@@ -126,10 +174,35 @@ export class EditorComponent {
     });
   }
 
+  // delete the current file from cloud storage
+  deleteFromStorage(filename){
+    // Create a reference to the file to delete
+    var storageRef = firebase.storage().ref().child('files');
+    var fileRef = storageRef.child(filename);
+    // Delete the file
+    fileRef.delete().then(function() {
+      // File deleted successfully
+      console.log('file deleted successfully!');
+    }).catch(function(error) {
+      // an error occurred!
+      console.log('error deleting file');
+    });
+  }
+
+  /**
+   * When a filename is edited, delete the old reference in storage, and save a new entry
+   * @param {oldFileName}: String - The previous filename
+   * @param {newFileName}: String - The new filename
+  */
+  updateFileInCloud(oldFileName, newFileName){
+    this.deleteFromStorage(oldFileName);
+    this.saveToCloud(newFileName);
+  }
+
+  // Render the current file in a new browser window
   serveFile(){
-    var contents = this.cm.getValue();
-    var newWindow = window.open();
-    newWindow.document.write(contents);
+    let url = `http://files.cloud-code.net/files/${this.currentFileName}`;
+    window.open(url, '_blank');
   }
 
   // update the save timestamp when saved
@@ -142,7 +215,11 @@ export class EditorComponent {
     })
   }
 
-  // changes the file in the editor
+  /**
+   * Changes the file in the editor
+   * @param {filekey}: String - A reference the current file's identifying key
+   * @param {filename}: String - A reference the current file's filename
+  */
   changeFile(filename, filekey){
     this.currentFileRef.child('users').child(this.userId).remove();
     this.currentFileName = filename;
@@ -154,7 +231,11 @@ export class EditorComponent {
     this.updateTimestamp();
   }
 
-  // change the mode to the provided syntax highlighting mode
+  /**
+   * Changes the file in the editor
+   * @param {filekey}: String - A reference the current file's identifying key
+   * @param {filename}: String - A reference the current file's filename
+  */
   changeMode(filename) {
     let splitArray = filename.split('.'); // splits the filename into tokens delimited by .
     let extension = splitArray[splitArray.length - 1]; // get the last token in the array
@@ -166,19 +247,91 @@ export class EditorComponent {
     this.cm.setOption("mode", newMode);
   }
 
-  // creates the file in the firebase database
+  /**
+   * Changes the editor's theme to either night mode or day mode
+   * @param {wasNightMode}: Boolean - True if the editor was on night mode
+  */
+  changeTheme(wasNightMode){
+    var newTheme;
+    if(wasNightMode){
+      newTheme="default";
+    }
+    else {
+      newTheme="monokai";
+    }
+    this.options = {
+      ...this.options,
+      theme: newTheme,
+    };
+    this.cm.setOption("theme", newTheme);
+  }
+
+  /**
+   * Creates a file and stores it in the firebase database and storage bucket
+   * @param {filename}: String - the name of the file to create
+  */
   createFile(filename){
-    console.log("creating file", filename);
-    var databaseRef = firebase.database().ref().child('files');
+    console.log('creating file');
     var postData = {
       "filename": filename
     };
-    var fileRef = databaseRef.push();
+    var fileRef = this.ref.child('files').push();
     fileRef.set(postData);
     this.currentFileName = filename;
     this.currentFileKey = fileRef.key;
-    this.saveToCloud();
+    this.saveToCloud(this.currentFileName);
     this.changeFile(filename, fileRef.key);
   }
 
+  // deletes the current file from the database and storage
+  deleteFromDatabase(){
+    this.currentFileRef.remove();
+    this.deleteFromStorage(this.currentFileName);
+    var self = this;
+    this.ref.child('files').once('value').then(function(dataSnapshot) {
+      if(dataSnapshot.val() == null) {
+        self.createFile('untitled');
+        self.events.publish('filename:updated', 'untitled');
+      }
+      else{
+        dataSnapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          let key  = childSnapshot.key;
+          self.events.publish('filename:updated', item['filename']);
+          self.changeFile(item['filename'], key);
+          return true;
+      });
+      }
+    });
+  }
+
+  /**
+   * searches the file list to either load a given file in the list,
+   * or create an untitled file if none exist
+  */
+  initLoadFile(){
+    var self = this;
+    this.ref.child('files').once('value').then(function(dataSnapshot) {
+      if(dataSnapshot.val() == null) {
+        self.createFile('untitled');
+        self.events.publish('filename:updated', 'untitled');
+      }
+      else{
+        dataSnapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          let key  = childSnapshot.key;
+          self.currentFileKey = key;
+          self.currentFileName = item['filename'];
+          self.events.publish('filename:updated', item['filename'], key);
+          self.currentFileRef = self.ref.child('files').child(self.currentFileKey);
+          self.userId = Math.floor(Math.random() * 9999).toString();
+          self.setFileInFirepad(self.currentFileKey);
+          return true;
+      });
+      }
+    });
+  }
 }
+
+
+
