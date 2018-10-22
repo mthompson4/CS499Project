@@ -121,8 +121,12 @@ export class AppComponent {
       if (event.key === "Enter") {
         let previousFileName = self.currentFileName;
         let newFileName = inputArea.value
+        if(previousFileName.toLowerCase() == newFileName.toLowerCase()){
+          inputArea.classList.toggle("hidden");
+          fileLabel.classList.toggle("hidden");
+          return
+        }
         var isDuplicate = false;
-        // self.currentFileName = inputArea.value;
         self.ref.child('files').once('value').then(function(dataSnapshot) {
           dataSnapshot.forEach(function(childSnapshot) {
             var item = childSnapshot.val();

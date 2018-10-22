@@ -29,7 +29,10 @@ function matchExtension(inputExtension){
 	return modes[inputExtension];
 }
 
-// either collapse or expand the sidebar based on current status
+/**
+   * Collapses the sidebar
+   * @param {isCollapsed}: Boolean - is true if the menu is currently collapsed
+*/
 function collapseSidebar(isCollapsed){
 	if(isCollapsed == false){
 		document.getElementById("firepad").style.left = "0px";
@@ -42,16 +45,25 @@ function collapseSidebar(isCollapsed){
 }
 
 
-// parameter isNightMode: is True if the editor is currenty in night mode and will switch to day mode
+/**
+   * toggles the classes between dark mode and light mode
+   * @param {isNightMode}: Boolean - is True if the editor is currenty in night mode and will switch to day mode
+*/
 function toggleClass(isNightMode){
 
-	var colorModeLink = document.getElementById("colorModeEnabler");
+	var colorModeLink = document.getElementById("modeLabel");
+	var modal_items;
 	if(isNightMode) { // switch to day mode
-		colorModeLink.innerHTML = "Enable Night Mode";
+		colorModeLink.innerHTML = " Enable Night Mode";
+		modal_items = document.getElementById('newFileModal').getElementsByClassName('bg-dark');
+		document.getElementById("modePic").src = "/assets/open-iconic/svg/moon.svg";
 	}
 	else {
-		colorModeLink.innerHTML = "Enable Day Mode";
+		colorModeLink.innerHTML = " Enable Day Mode";
+		modal_items = document.getElementById('newFileModal').getElementsByClassName('bg-light');
+		document.getElementById("modePic").src = "/assets/open-iconic/svg/sun.svg";
 	}
+
 	document.getElementById("myNav").classList.toggle("navbar-dark");
 	document.getElementById("myNav").classList.toggle("bg-dark");
 
@@ -59,14 +71,14 @@ function toggleClass(isNightMode){
 	var dropdown_menus = document.body.getElementsByClassName('dropdown-menu');
 	var file_toggler = document.body.getElementsByClassName('file-toggler');
 	let userList = document.getElementById("userlist");
-	let modal_items = document.getElementById('newFileModal').getElementsByClassName('bg-dark');
-	console.log(modal_items);
 
 	let elements_to_change = [...dropdown_items, ...dropdown_menus, ...file_toggler, ...modal_items];
 	console.log(elements_to_change);
 	for(var i = 0; i < elements_to_change.length; ++i){
 		elements_to_change[i].classList.toggle("bg-dark");
 		elements_to_change[i].classList.toggle("text-white");
+		elements_to_change[i].classList.toggle("bg-light");
+		elements_to_change[i].classList.toggle("text-black");
 	}
 	userList.classList.toggle("bg-dark");
 	userList.classList.toggle("text-white");
