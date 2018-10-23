@@ -10,8 +10,9 @@ import { Observable } from 'rxjs';
 import { CodemirrorModule } from 'ng2-codemirror';
 import { FormsModule } from '@angular/forms';
 import { Events } from 'ionic-angular';
-import { AppRoutingModule } from './app-routing.module';
 import { EditorComponent } from './editor/editor.component';
+import * as firebase from 'firebase';
+
 
 @NgModule({
   declarations: [
@@ -21,10 +22,9 @@ import { EditorComponent } from './editor/editor.component';
   ],
   imports: [
     BrowserModule,
-    AngularFireModule.initializeApp(environment.firebase, 'test-project'),
+    AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
     CodemirrorModule,
-    AppRoutingModule,
     FormsModule
   ],
   providers: [Events],

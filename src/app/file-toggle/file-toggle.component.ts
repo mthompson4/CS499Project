@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { Observable } from 'rxjs';
-import { ActivatedRoute, Router, Event } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -13,10 +12,10 @@ import { map } from 'rxjs/operators';
 
 export class FileToggleComponent{
 	files: Observable<any[]>;
+	isNightMode = true;
 	constructor(
 		db: AngularFireDatabase, 
-		public events: Events,
-		private router: Router
+		public events: Events
 	) {
 		this.files = db.list('files').snapshotChanges().pipe(map(items => {            // <== new way of chaining
     		return items.map(a => {
@@ -25,8 +24,13 @@ export class FileToggleComponent{
       			return {key, data};          
       		});
     	}));
+
+    	events.subscribe('color:switched', (toMode) => {
+      		this.isNightMode = !(this.isNightMode);
+    	});
 	}
 
+	// send the file to the editor that was just clicked in the filelist
 	fileClicked(file){
 		let filename = file.data["filename"];
 		let filekey = file.key;
