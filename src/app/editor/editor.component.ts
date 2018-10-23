@@ -59,6 +59,7 @@ export class EditorComponent {
   ref: firebase.database.Reference;
   currentFileRef: firebase.database.Reference;
   userId;
+  isSaving: boolean;
 
    /**
    * Represents the text editor class
@@ -96,16 +97,33 @@ export class EditorComponent {
       this.updateFileInCloud(oldFileName, newFileName);
       this.changeMode(newFileName);
     });
+
+    events.subscribe('file:updateListener', (cmInstance) => {
+      var self = this;
+      var timeoutHandler;
+      this.cm.on("change", function(cm, change) {
+        if(!self.isSaving) {
+          console.log("Waiting to save...");
+          self.isSaving = true;
+          timeoutHandler = setTimeout(function(){
+            self.saveToCloud(self.currentFileName);
+          }, 15000);
+        }
+      });
+    });
    }
+
 
   /* Code executes after the view inits: sets global objects and loads a file to the editor*/
   ngAfterViewInit() {
     // set the codemirror instance
+    this.isSaving = false;
     const codemirrorInstance = this.codemirrorComponent.instance;
     this.cm = codemirrorInstance;
     this.ref = firebase.database().ref();
     // choose a file to load in the editor at default
     this.initLoadFile();
+    this.events.publish('file:updateListener', this.cm);
   }
 
   /**
@@ -171,6 +189,7 @@ export class EditorComponent {
         "Timestamp": saveTimestamp
       };
       databaseRef.set(postData);
+      self.isSaving = false;
     });
   }
 
