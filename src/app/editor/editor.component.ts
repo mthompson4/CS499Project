@@ -92,7 +92,7 @@ export class EditorComponent {
     });
 
     events.subscribe('filename:edited', (oldFileName, newFileName) => {
-      // this.currentFileName = newFileName;
+      this.currentFileName = newFileName;
       this.updateFileInCloud(oldFileName, newFileName);
       this.changeMode(newFileName);
     });
