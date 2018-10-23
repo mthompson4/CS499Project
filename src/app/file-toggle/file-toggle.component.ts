@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { Observable } from 'rxjs';
-import { ActivatedRoute, Router, Event } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -16,8 +15,7 @@ export class FileToggleComponent{
 	isNightMode = true;
 	constructor(
 		db: AngularFireDatabase, 
-		public events: Events,
-		private router: Router
+		public events: Events
 	) {
 		this.files = db.list('files').snapshotChanges().pipe(map(items => {            // <== new way of chaining
     		return items.map(a => {

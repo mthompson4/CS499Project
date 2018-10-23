@@ -4,6 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { Events } from 'ionic-angular';
 import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
+import { CodemirrorComponent } from 'ng2-codemirror';
 import 'firebase/database';
 
 // #region External JS methods
@@ -23,6 +24,7 @@ export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = '';
   currentFileKey = '';
+  title = 'test';
   isCollapsed = false;
   isNightMode = true;
   constructor(
@@ -48,7 +50,7 @@ export class AppComponent {
       messagingSenderId: "824045995979"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // firebase.initializeApp(firebaseConfig);
     this.ref = firebase.database().ref();
     this.editFileName();
   }
