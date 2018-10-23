@@ -331,6 +331,12 @@ export class EditorComponent {
       }
     });
   }
+
+  setTab(event: MouseEvent){
+    let clickedElement = event.srcElement;
+    clickedElement.classList.toggle('active');
+  }
+
 }
 
 

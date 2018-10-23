@@ -12,6 +12,11 @@
 }
 
 .list-group-item {
+	display: inline-block;
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	height: 30px;
 	padding: 3px 10px;
 	font-size: 12px;

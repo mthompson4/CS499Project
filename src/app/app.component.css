@@ -17,3 +17,12 @@
     .btn{
       margin-left:10px;
     }
+
+    #fileNameLabel {
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }

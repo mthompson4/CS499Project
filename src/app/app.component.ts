@@ -63,36 +63,50 @@ export class AppComponent {
     this.events.publish('file:rendered');
   }
 
-  fileCreated(form : NgForm) {
-    let newFileName = form.value["fileName"];
-    // check to see if filename was provided
-    if (newFileName.includes('.') == false){
-      showModalError("Please enter a file extension");
+  parseFileName(filename){
+    var errorCode;
+    var isValid = true;
+    if(filename == undefined){
+      errorCode = "Filename cannot be empty";
+      isValid = false;
+    }
+    else if (filename.includes('.') == false){
+      errorCode = "Please enter a file extension";
+      isValid = false;
+    }
+    else if(filename.includes(' ') == true){
+      errorCode = "Filenames cannot include spaces";
+      isValid = false;
     }
     else {
        var self = this;
-       var isDuplicate = false;
        // check the file list to ensure no duplicate filenames
        this.ref.child('files').once('value').then(function(dataSnapshot) {
          dataSnapshot.forEach(function(childSnapshot) {
          var item = childSnapshot.val();
-         console.log(item);
          if(item["filename"] != undefined){
            var currFileName = item["filename"];
-           if(currFileName.toLowerCase() == newFileName.toLowerCase()){
-             isDuplicate = true;
-             return true;
+           if(currFileName.toLowerCase() == filename.toLowerCase()){
+             isValid = false;
+             errorCode = "Filename already exists!";
+             return true; // return true to exit async function
             }
            }
         });
-        if (isDuplicate) {
-          showModalError("Filename already exists!");
-        }
-        else {
-          self.events.publish('file:created', newFileName);
-          closeModal();
-        }
       });
+    }
+    return [isValid, errorCode];
+  }
+
+  fileCreated(form : NgForm) {
+    let newFileName = form.value["fileName"];
+    let returnValue = this.parseFileName(newFileName);
+    if(returnValue[0] == false){
+       showModalError(returnValue[1]);
+    }
+    else {
+      this.events.publish('file:created', newFileName);
+      closeModal();
     }
   }
 
@@ -128,33 +142,22 @@ export class AppComponent {
           fileLabel.classList.toggle("hidden");
           return
         }
-        var isDuplicate = false;
-        self.ref.child('files').once('value').then(function(dataSnapshot) {
-          dataSnapshot.forEach(function(childSnapshot) {
-            var item = childSnapshot.val();
-            if(item["filename"] != undefined){
-              var currFileName = item["filename"];
-                if(currFileName.toLowerCase() == newFileName.toLowerCase()){
-                  isDuplicate = true;
-                  return true;
-                }
-            }
-          });
-          if (isDuplicate) {
-            alert("Filename already exists! Please choose a different filename.");
-            inputArea.classList.toggle("hidden");
-            fileLabel.classList.toggle("hidden");
-          }
-          else {
-            var updateValues = {"filename": inputArea.value};
-            self.ref.child("files").child(self.currentFileKey).update(updateValues);
-            self.events.publish('filename:edited', previousFileName, newFileName);
-            inputArea.classList.toggle("hidden");
-            fileLabel.classList.toggle("hidden");
-            self.currentFileName = newFileName;
-          }
-        });
+
+        let returnValue = self.parseFileName(newFileName);
+        if(returnValue[0] == false){
+          alert(returnValue[1]);
+          inputArea.classList.toggle("hidden");
+          fileLabel.classList.toggle("hidden");
         }
+        else {
+          var updateValues = {"filename": inputArea.value};
+          self.ref.child("files").child(self.currentFileKey).update(updateValues);
+          self.events.publish('filename:edited', previousFileName, newFileName);
+          inputArea.classList.toggle("hidden");
+          fileLabel.classList.toggle("hidden");
+          self.currentFileName = newFileName;
+        }
+       }
      });
   }
 }
