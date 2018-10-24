@@ -6,7 +6,7 @@ import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
 import { CodemirrorComponent } from 'ng2-codemirror';
 import 'firebase/database';
-
+import { environment } from '../environments/environment';
 // #region External JS methods
 declare function showModalError(message): any;
 declare function closeModal(): any;
@@ -30,6 +30,7 @@ export class AppComponent {
   constructor(
     public events: Events
   ) {
+    firebase.initializeApp(environment.firebaseConfig);
     events.subscribe('file:toggled', (filename, filekey) => {
       this.currentFileName = filename;
       this.currentFileKey = filekey;
@@ -81,7 +82,7 @@ export class AppComponent {
     else {
        var self = this;
        // check the file list to ensure no duplicate filenames
-       this.ref.child('files').once('value').then(function(dataSnapshot) {
+       this.ref.child('test-files').once('value').then(function(dataSnapshot) {
          dataSnapshot.forEach(function(childSnapshot) {
          var item = childSnapshot.val();
          if(item["filename"] != undefined){

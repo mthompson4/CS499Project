@@ -26,3 +26,7 @@
     border: 2px solid #000;
     padding: 0 18px 2px 18px;
 }
+
+.file-item {
+	margin-left: 5px;
+}

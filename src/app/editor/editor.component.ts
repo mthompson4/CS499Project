@@ -39,7 +39,7 @@ export class EditorComponent {
   @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
   cm: any;
   currentFileName;
-  currentFileKey;
+  currentFilePath;
   options = {
     mode: {
       name: 'xml',
@@ -133,7 +133,8 @@ export class EditorComponent {
   setFileInFirepad(filekey){
     console.log(this.userId);
     document.getElementById('userlist').innerHTML = '';
-    this.currentFileRef = this.ref.child('files').child(filekey);
+    this.currentFileRef = this.ref.child('test-files').child(filekey);
+    console.log("Current File Ref", this.currentFileRef.toString())
     this.firepad = Firepad.fromCodeMirror(this.currentFileRef, this.cm, { userId: this.userId});
     var userlist = FirepadUserList.fromDiv(this.currentFileRef.child('users'), document.getElementById('userlist'), this.userId);
     this.updateTimestamp();
@@ -166,7 +167,7 @@ export class EditorComponent {
     // grab the timestamp element
     var saveTimestampElement = document.getElementById('saveTimestamp');
     saveTimestampElement.innerHTML = 'Saving......';
-    var storageRef = firebase.storage().ref().child('files');
+    var storageRef = firebase.storage().ref().child('test-files');
     // get the firebase storage ref
     var fileRef = storageRef.child(filename);
     // grab the contents of the editor as a string
@@ -184,7 +185,7 @@ export class EditorComponent {
       let saveTimestamp = date.toLocaleTimeString();
       saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
       // set the ref in the firebase database with the timestamp
-      var databaseRef = firebase.database().ref().child('save').child(self.currentFileKey);
+      var databaseRef = firebase.database().ref().child('save').child(self.currentFilePath);
       var postData = {
         "Timestamp": saveTimestamp
       };
@@ -196,7 +197,7 @@ export class EditorComponent {
   // delete the current file from cloud storage
   deleteFromStorage(filename){
     // Create a reference to the file to delete
-    var storageRef = firebase.storage().ref().child('files');
+    var storageRef = firebase.storage().ref().child('test-files');
     var fileRef = storageRef.child(filename);
     // Delete the file
     fileRef.delete().then(function() {
@@ -220,13 +221,13 @@ export class EditorComponent {
 
   // Render the current file in a new browser window
   serveFile(){
-    let url = `http://files.cloud-code.net/files/${this.currentFileName}`;
+    let url = `http://files.cloud-code.net/test-files/${this.currentFileName}`;
     window.open(url, '_blank');
   }
 
   // update the save timestamp when saved
   updateTimestamp(){
-    var timestampRef = this.ref.child('save').child(this.currentFileKey);
+    var timestampRef = this.ref.child('save').child(this.currentFilePath);
     // listen for changes to the value of the timestamp
     timestampRef.on('value', function(snapshot){
       var saveTimestamp = snapshot.val()["Timestamp"];
@@ -242,7 +243,7 @@ export class EditorComponent {
   changeFile(filename, filekey){
     this.currentFileRef.child('users').child(this.userId).remove();
     this.currentFileName = filename;
-    this.currentFileKey = filekey;
+    this.currentFilePath = filekey;
     this.firepad.dispose();
     this.cm.setValue('');
     this.setFileInFirepad(filekey);
@@ -294,10 +295,10 @@ export class EditorComponent {
     var postData = {
       "filename": filename
     };
-    var fileRef = this.ref.child('files').push();
+    var fileRef = this.ref.child('test-files').push();
     fileRef.set(postData);
     this.currentFileName = filename;
-    this.currentFileKey = fileRef.key;
+    this.currentFilePath = fileRef.key;
     this.saveToCloud(this.currentFileName);
     this.changeFile(filename, fileRef.key);
   }
@@ -307,7 +308,7 @@ export class EditorComponent {
     this.currentFileRef.remove();
     this.deleteFromStorage(this.currentFileName);
     var self = this;
-    this.ref.child('files').once('value').then(function(dataSnapshot) {
+    this.ref.child('test-files').once('value').then(function(dataSnapshot) {
       if(dataSnapshot.val() == null) {
         self.createFile('untitled');
         self.events.publish('filename:updated', 'untitled');
@@ -330,7 +331,7 @@ export class EditorComponent {
   */
   initLoadFile(){
     var self = this;
-    this.ref.child('files').once('value').then(function(dataSnapshot) {
+    this.ref.child('test-files').once('value').then(function(dataSnapshot) {
       if(dataSnapshot.val() == null) {
         self.createFile('untitled');
         self.events.publish('filename:updated', 'untitled');
@@ -339,12 +340,12 @@ export class EditorComponent {
         dataSnapshot.forEach(function(childSnapshot) {
           var item = childSnapshot.val();
           let key  = childSnapshot.key;
-          self.currentFileKey = key;
+          self.currentFilePath = key;
           self.currentFileName = item['filename'];
           self.events.publish('filename:updated', item['filename'], key);
-          self.currentFileRef = self.ref.child('files').child(self.currentFileKey);
+          self.currentFileRef = self.ref.child('test-files').child(self.currentFilePath);
           self.userId = Math.floor(Math.random() * 9999).toString();
-          self.setFileInFirepad(self.currentFileKey);
+          self.setFileInFirepad(self.currentFilePath);
           return true;
       });
       }

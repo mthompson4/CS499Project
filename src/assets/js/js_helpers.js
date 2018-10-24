@@ -84,3 +84,38 @@ function toggleClass(isNightMode){
 	userList.classList.toggle("text-white");
 
 }
+
+function toggleHelper(dirId){
+	// $('#files').on('show.bs.collapse', function (){
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	// 	console.log('shown');
+	// }).on('hide.bs.collapse', function(){
+	// 	console.log('hidden');
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	// });
+	let newId = '#' + dirId;
+	// $(dirId).on('show.bs.collapse', function (){
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	// 	console.log('shown');
+	// }).on('hide.bs.collapse', function(){
+	// 	console.log('hidden');
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
+	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	// });
+	$(newId).collapse('toggle').on('show.bs.collapse', function(){
+		console.log('whoaaaa');
+		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
+		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	}).on('hide.bs.collapse', function(){
+		console.log('hidden');
+		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
+		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	});
+
+}
+
+
+
