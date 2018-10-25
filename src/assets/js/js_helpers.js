@@ -1,13 +1,13 @@
-function closeModal(){
-	$('#newFileModal').modal('hide');
-	$('#newFileModal').on('hidden.bs.modal', function () {
+function closeModal(modalId){
+	$(modalId).modal('hide');
+	$(modalId).on('hidden.bs.modal', function () {
     	$(this).find('form').trigger('reset');
 	});
 }
 
-function showModalError(message){
-	$('#newFileModalError').removeClass('invisible');
-	$('#newFileModalError').html(message);
+function showModalError(message, modalId){
+	$(modalId).removeClass('invisible');
+	$(modalId).html(message);
 }
 
 
@@ -85,36 +85,19 @@ function toggleClass(isNightMode){
 
 }
 
+// the on-click function for directories so they show the contents of the directory
 function toggleHelper(dirId){
-	// $('#files').on('show.bs.collapse', function (){
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
-	// 	console.log('shown');
-	// }).on('hide.bs.collapse', function(){
-	// 	console.log('hidden');
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
-	// });
 	let newId = '#' + dirId;
-	// $(dirId).on('show.bs.collapse', function (){
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
-	// 	console.log('shown');
-	// }).on('hide.bs.collapse', function(){
-	// 	console.log('hidden');
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
-	// 	document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
-	// });
-	$(newId).collapse('toggle').on('show.bs.collapse', function(){
-		console.log('whoaaaa');
-		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
-		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+	let arrowId = dirId + '-arrow';
+	$(newId).on('show.bs.collapse', function(){
+		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
+		document.getElementById(arrowId).classList.add("octicon-arrow-down");
 	}).on('hide.bs.collapse', function(){
 		console.log('hidden');
-		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-right");
-		document.getElementById('directory-arrow').classList.toggle("octicon-arrow-down");
+		document.getElementById(arrowId).classList.add("octicon-arrow-right");
+		document.getElementById(arrowId).classList.remove("octicon-arrow-down");
 	});
-
+	$(newId).collapse('toggle')
 }
 
 

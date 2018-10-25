@@ -13,7 +13,7 @@ import { Events } from 'ionic-angular';
 import { EditorComponent } from './editor/editor.component';
 import * as firebase from 'firebase';
 
-
+firebase.initializeApp(environment.firebaseConfig);
 @NgModule({
   declarations: [
     AppComponent,

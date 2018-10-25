@@ -12,6 +12,7 @@ export class FileService {
 		this.filesRef = firebase.database().ref().child('test-files');
 	}
 
+	// gets all the files and their associated metadata
 	getFiles(){
 		return new Observable<any>(observer => {
 			this.filesRef.on("value", snapshot => {
@@ -25,9 +26,9 @@ export class FileService {
 					if(snapVal["filename"] == undefined){
 						isFile = false;
 						for(var i in snapVal){
-							console.log(i, snapVal[i]);
+							// console.log(i, snapVal[i]);
 							let newPath = key + '/' + i;
-							console.log(newPath);
+							// console.log(newPath);
 							var dirFileObj = {
 								isFile: true,
 								path: newPath,
@@ -40,7 +41,7 @@ export class FileService {
 							path: key,
 							data: dirData
 						}
-						console.log("file data", file);
+						// console.log("file data", file);
 					}
 					else {
 						file = {
@@ -49,11 +50,59 @@ export class FileService {
 							data: snapVal
 						}
 					}
-					console.log(file);
+					// console.log(file);
 					tempArr.push(file);
 				});
 				observer.next(tempArr);
 			})
 		})
 	}
+
+	// returns an array of just the file names in the database
+	getAllFileNames(){
+		return new Observable<any>(observer => {
+			this.filesRef.on("value", snapshot => {
+				var tempArr = [];
+				snapshot.forEach(function(data) {
+					const snapVal = data.val();
+					var filename;
+					if(snapVal["filename"] == undefined){
+						for(var i in snapVal){
+							filename = snapVal[i]["filename"];
+							if(filename != undefined){
+								tempArr.push(filename);
+							}
+						}
+					}
+					else {
+						filename = snapVal["filename"];
+						if(filename != undefined){
+							tempArr.push(filename);
+						}
+					}
+				});
+				observer.next(tempArr);
+			})
+		})
+	}
+
+	// returns an array of just the "directory" names in the database
+	getAllDirNames(){
+		return new Observable<any>(observer => {
+			this.filesRef.on("value", snapshot => {
+				var tempArr = [];
+				snapshot.forEach(function(data) {
+					const snapVal = data.val();
+					if(snapVal["filename"] == undefined){
+						const dirName = data.key;
+						tempArr.push(data.key);
+					}
+				});
+				observer.next(tempArr);
+			})
+		})
+	}
+
+
+
 }

@@ -14,8 +14,7 @@ declare function toggleHelper(dirId): any;
   providers: [FileService]
 })
 
-export class FileToggleComponent implements AfterViewInit {
-	// files: Observable<any[]>;
+export class FileToggleComponent {
   public newFiles: Array<any> = [];
 	filesArray: Array<Object> = [];
 	directories: Array<Object> = [];
@@ -25,31 +24,6 @@ export class FileToggleComponent implements AfterViewInit {
     private _fileService: FileService,
 		public events: Events
 	) {
-		
-		// this.files = db.list('test-files').snapshotChanges().pipe(map(items => {
-		// 	this.directories = [];
-  //   		return items.map(a => {
-  //     			const data = a.payload.val();
-  //     			const key = a.payload.key;
-
-  //     			if(data["filename"] == undefined){
-  //     				console.log("Directory", key, data);
-  //     				this.directories.push({key, data});
-  //     				console.log(this.directories);
-  //     				for(var i in data){
-  //     					console.log(i, data[i]);
-  //     				}
-  //     			}
-  //     			else {
-  //     				console.log("File", key, data);
-  //     				this.filesArray.push({key, data});
-  //     			}
-
-  //     			return {key, data};          
-  //     		});
-
-  //   	}));
-
     	events.subscribe('color:switched', (toMode) => {
       		this.isNightMode = !(this.isNightMode);
     	});
@@ -58,10 +32,6 @@ export class FileToggleComponent implements AfterViewInit {
   ngOnInit(){
     this.populateFilesArr();
   }
-
-	ngAfterViewInit(){
-		// toggleHelper();
-	}
 
   populateFilesArr(){
     this._fileService.getFiles().subscribe(files => 
@@ -80,6 +50,5 @@ export class FileToggleComponent implements AfterViewInit {
 		let filename = file.data["filename"];
 		let filepath = file.path;
 		this.events.publish('file:toggled', filename, filepath);
-    console.log(file);
 	}
 }

@@ -76,28 +76,26 @@ export class EditorComponent {
     events.subscribe('file:saved', () => {
       this.saveToCloud(this.currentFileName);
     });
-    events.subscribe('file:created', (filename) => {
-      this.createFile(filename);
+    events.subscribe('file:created', (filename, fileRef) => {
+      this.createFile(filename, fileRef);
     });
-
+    events.subscribe('directory:created', (dirname) => {
+      this.createDirectory(dirname);
+    });
     events.subscribe('file:rendered', () => {
       this.serveFile();
     });
-
     events.subscribe('color:switched', (wasNightMode) => {
       this.changeTheme(wasNightMode);
     });
-
     events.subscribe('file:deleted', () => {
       this.deleteFromDatabase();
     });
-
     events.subscribe('filename:edited', (oldFileName, newFileName) => {
       this.currentFileName = newFileName;
       this.updateFileInCloud(oldFileName, newFileName);
       this.changeMode(newFileName);
     });
-
     events.subscribe('file:updateListener', (cmInstance) => {
       var self = this;
       var timeoutHandler;
@@ -112,7 +110,6 @@ export class EditorComponent {
       });
     });
    }
-
 
   /* Code executes after the view inits: sets global objects and loads a file to the editor*/
   ngAfterViewInit() {
@@ -131,10 +128,8 @@ export class EditorComponent {
    * @param {filekey}: String - A reference the current file's identifying key
   */
   setFileInFirepad(filekey){
-    console.log(this.userId);
     document.getElementById('userlist').innerHTML = '';
     this.currentFileRef = this.ref.child('test-files').child(filekey);
-    console.log("Current File Ref", this.currentFileRef.toString())
     this.firepad = Firepad.fromCodeMirror(this.currentFileRef, this.cm, { userId: this.userId});
     var userlist = FirepadUserList.fromDiv(this.currentFileRef.child('users'), document.getElementById('userlist'), this.userId);
     this.updateTimestamp();
@@ -240,13 +235,13 @@ export class EditorComponent {
    * @param {filekey}: String - A reference the current file's identifying key
    * @param {filename}: String - A reference the current file's filename
   */
-  changeFile(filename, filekey){
+  changeFile(filename, filePath){
     this.currentFileRef.child('users').child(this.userId).remove();
     this.currentFileName = filename;
-    this.currentFilePath = filekey;
+    this.currentFilePath = filePath;
     this.firepad.dispose();
     this.cm.setValue('');
-    this.setFileInFirepad(filekey);
+    this.setFileInFirepad(filePath);
     this.changeMode(filename);
     this.updateTimestamp();
   }
@@ -290,17 +285,28 @@ export class EditorComponent {
    * Creates a file and stores it in the firebase database and storage bucket
    * @param {filename}: String - the name of the file to create
   */
-  createFile(filename){
+  createFile(filename, fileRef){
     console.log('creating file');
     var postData = {
       "filename": filename
     };
-    var fileRef = this.ref.child('test-files').push();
+    // var fileRef = this.ref.child('test-files').push();
+    console.log("New file Ref", fileRef.toString());
     fileRef.set(postData);
     this.currentFileName = filename;
-    this.currentFilePath = fileRef.key;
+    // TODO: Find better way to do this, but this grabs the end path of the current file
+    this.currentFilePath = fileRef.toString().split('https://cs499-team-4.firebaseio.com/test-files')[1];
     this.saveToCloud(this.currentFileName);
-    this.changeFile(filename, fileRef.key);
+    this.changeFile(filename, this.currentFilePath);
+  }
+
+  /**
+   * Creates a directory and stores it in the firebase database
+   * @param {dirname}: String - the name of the directory to create
+  */
+  createDirectory(dirname){
+    console.log('creating a directory');
+    var fileRef = this.ref.child('test-files').child(dirname).set(true);
   }
 
   // deletes the current file from the database and storage
@@ -310,7 +316,7 @@ export class EditorComponent {
     var self = this;
     this.ref.child('test-files').once('value').then(function(dataSnapshot) {
       if(dataSnapshot.val() == null) {
-        self.createFile('untitled');
+        self.createFile('untitled', this.ref.child('test-files').push());
         self.events.publish('filename:updated', 'untitled');
       }
       else{
@@ -333,7 +339,7 @@ export class EditorComponent {
     var self = this;
     this.ref.child('test-files').once('value').then(function(dataSnapshot) {
       if(dataSnapshot.val() == null) {
-        self.createFile('untitled');
+        self.createFile('untitled', this.ref.child('test-files').push());
         self.events.publish('filename:updated', 'untitled');
       }
       else{
