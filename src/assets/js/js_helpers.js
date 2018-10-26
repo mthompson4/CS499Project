@@ -86,19 +86,36 @@ function toggleClass(isNightMode){
 }
 
 // the on-click function for directories so they show the contents of the directory
-function toggleHelper(dirId){
+function toggleHelper(dirId, dirRef){
 	let newId = '#' + dirId;
 	let arrowId = dirId + '-arrow';
 	$(newId).on('show.bs.collapse', function(){
 		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
 		document.getElementById(arrowId).classList.add("octicon-arrow-down");
 	}).on('hide.bs.collapse', function(){
-		console.log('hidden');
 		document.getElementById(arrowId).classList.add("octicon-arrow-right");
 		document.getElementById(arrowId).classList.remove("octicon-arrow-down");
 	});
-	$(newId).collapse('toggle')
+	// $(newId).collapse('toggle')
+	if ($(newId).hasClass('collapse') && $(newId).hasClass('show')) {
+		$(newId).collapse('hide');
+		var postData = {
+     		"isToggled": false
+    	};
+    	dirRef.update(postData);
+
+	}
+	else {
+		$(newId).collapse('show');
+		var postData = {
+     		"isToggled": true
+    	};
+    	dirRef.update(postData);
+	}
 }
 
+function testyDblClick(){
+	console.log("double double click");
+}
 
 

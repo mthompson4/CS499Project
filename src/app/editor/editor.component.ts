@@ -91,6 +91,9 @@ export class EditorComponent {
     events.subscribe('file:deleted', () => {
       this.deleteFromDatabase();
     });
+    events.subscribe('directory:deleted', (dirname) => {
+      this.deleteDirectory(dirname);
+    });
     events.subscribe('filename:edited', (oldFileName, newFileName) => {
       this.currentFileName = newFileName;
       this.updateFileInCloud(oldFileName, newFileName);
@@ -105,7 +108,7 @@ export class EditorComponent {
           self.isSaving = true;
           timeoutHandler = setTimeout(function(){
             self.saveToCloud(self.currentFileName);
-          }, 15000);
+          }, 5000);
         }
       });
     });
@@ -135,7 +138,10 @@ export class EditorComponent {
     this.updateTimestamp();
   }
 
-
+  /**
+   * Matches the mimetype of a file
+   * @param {inputFilename}: String - A reference to the inputted filename
+  */
   matchMimeType(inputFilename){
     let splitArray = inputFilename.split('.'); // splits the filename into tokens delimited by .
     let extension = splitArray[splitArray.length - 1]; // get the last token in the array
@@ -157,16 +163,17 @@ export class EditorComponent {
     }
   }
 
-  // Save a file to the cloud and update the save timestamp
+  /**
+   * Saves a file to the cloud
+   * @param {filename}: String - The filename to save
+  */
   saveToCloud(filename){
     // grab the timestamp element
     var saveTimestampElement = document.getElementById('saveTimestamp');
     saveTimestampElement.innerHTML = 'Saving......';
     var storageRef = firebase.storage().ref().child('test-files');
     // get the firebase storage ref
-    var fileRef = storageRef.child(filename);
     // grab the contents of the editor as a string
-    // TODO: match up the mime types based on the filetype
     let mimeType = this.matchMimeType(filename);
     var message = this.firepad.getText();
     var myblob = new Blob([message], {
@@ -174,6 +181,14 @@ export class EditorComponent {
     });
     // putString saves the file to firebase storage
     var self = this;
+    let path = this.currentFilePath.split('/');
+    var fileRef;
+    if(path.length > 1){
+      fileRef = storageRef.child(path[0]).child(filename);
+    }
+    else {
+      fileRef = storageRef.child(filename);
+    }
     fileRef.put(myblob).then(function(snapshot) {
       // grab the current timestamp
       let date = new Date();
@@ -189,11 +204,21 @@ export class EditorComponent {
     });
   }
 
-  // delete the current file from cloud storage
+  /**
+   * Deletes the filename from the cloud storage bucket
+   * @param {filename}: String - A reference to the inputted filename to delete
+  */
   deleteFromStorage(filename){
     // Create a reference to the file to delete
     var storageRef = firebase.storage().ref().child('test-files');
-    var fileRef = storageRef.child(filename);
+    let path = this.currentFilePath.split('/');
+    var fileRef;
+    if(path.length > 1){
+      fileRef = storageRef.child(path[0]).child(filename);
+    }
+    else {
+      fileRef = storageRef.child(filename);
+    }
     // Delete the file
     fileRef.delete().then(function() {
       // File deleted successfully
@@ -216,7 +241,15 @@ export class EditorComponent {
 
   // Render the current file in a new browser window
   serveFile(){
-    let url = `http://files.cloud-code.net/test-files/${this.currentFileName}`;
+    var url;
+    let path = this.currentFilePath.split('/');
+    var fileRef;
+    if(path.length > 1){
+      url = `http://files.cloud-code.net/test-files/${path[0]}/${this.currentFileName}`;
+    }
+    else {
+      url = `http://files.cloud-code.net/test-files/${this.currentFileName}`;
+    }
     window.open(url, '_blank');
   }
 
@@ -290,8 +323,6 @@ export class EditorComponent {
     var postData = {
       "filename": filename
     };
-    // var fileRef = this.ref.child('test-files').push();
-    console.log("New file Ref", fileRef.toString());
     fileRef.set(postData);
     this.currentFileName = filename;
     // TODO: Find better way to do this, but this grabs the end path of the current file
@@ -307,6 +338,61 @@ export class EditorComponent {
   createDirectory(dirname){
     console.log('creating a directory');
     var fileRef = this.ref.child('test-files').child(dirname).set(true);
+  }
+
+  /**
+   * Creates a directory and stores it in the firebase database
+   * @param {dirname}: String - the name of the directory to create
+  */
+  deleteDirectory(dirname){
+    console.log('deleting directory', dirname);
+    let dirRef = this.ref.child('test-files').child(dirname);
+    dirRef.remove();
+    this.deleteDirectoryFromStorage(dirname);
+    var self = this;
+    this.ref.child('test-files').once('value').then(function(dataSnapshot) {
+      if(dataSnapshot.val() == null) {
+        self.createFile('untitled', this.ref.child('test-files').push());
+        self.events.publish('filename:updated', 'untitled');
+      }
+      else{
+        dataSnapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          let key  = childSnapshot.key;
+          self.events.publish('filename:updated', item['filename']);
+          self.changeFile(item['filename'], key);
+          return true;
+      });
+      }
+    });
+  }
+
+
+  deleteDirectoryFromStorage(dirname){
+     // Create a reference to the file to delete
+    var storageRef = firebase.storage().ref().child('test-files');
+    var dirFileRef;
+    
+    // Delete the file
+    var self = this;
+    this.ref.child('test-files').child(dirname).once('value').then(function(dataSnapshot) {
+      if(dataSnapshot.val() != null) {
+        dataSnapshot.forEach(function(childSnapshot) {
+          var item = childSnapshot.val();
+          var filename = item['filename'];
+          if(filename != undefined){
+            dirFileRef = storageRef.child(dirname).child(filename);
+            dirFileRef.delete().then(function() {
+            // File deleted successfully
+              console.log('directory deleted successfully!');
+            }).catch(function(error) {
+              // an error occurred!
+              console.log('error deleting directory', error);
+            });
+          }
+      });
+      }
+    });
   }
 
   // deletes the current file from the database and storage

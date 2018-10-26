@@ -4,8 +4,9 @@ import { Events } from 'ionic-angular';
 import { Observable } from 'rxjs';
 import { FileService } from '../file.service';
 import { map } from 'rxjs/operators';
+import * as firebase from 'firebase/app';
 
-declare function toggleHelper(dirId): any;
+declare function toggleHelper(dirId, dirRef): any;
 
 @Component({
   selector: 'file-toggle',
@@ -19,6 +20,7 @@ export class FileToggleComponent {
 	filesArray: Array<Object> = [];
 	directories: Array<Object> = [];
 	isNightMode = true;
+  ref: firebase.database.Reference;
 	constructor(
 		db: AngularFireDatabase, 
     private _fileService: FileService,
@@ -31,6 +33,7 @@ export class FileToggleComponent {
 
   ngOnInit(){
     this.populateFilesArr();
+    this.ref = firebase.database().ref();
   }
 
   populateFilesArr(){
@@ -40,10 +43,16 @@ export class FileToggleComponent {
   }
 
   toggleDir(dirId){
-    console.log("Toggling Dir", dirId);
-    toggleHelper(dirId);
+    let dirRef = this.ref.child('test-files').child(dirId);
+    toggleHelper(dirId, dirRef);
   }
 
+  deleteDir(dirPath){
+    this.events.publish('directory:deleted', dirPath);
+  }
+  testFunc(){
+    console.log("double clicked");
+  }
 
 	// send the file to the editor that was just clicked in the filelist
 	fileClicked(file){

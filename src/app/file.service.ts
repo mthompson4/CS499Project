@@ -23,21 +23,28 @@ export class FileService {
 					var isFile = true;
 					var dirData = [];
 					var file;
+					var isToggled = false;
 					if(snapVal["filename"] == undefined){
 						isFile = false;
 						for(var i in snapVal){
 							// console.log(i, snapVal[i]);
-							let newPath = key + '/' + i;
-							// console.log(newPath);
-							var dirFileObj = {
-								isFile: true,
-								path: newPath,
-								data: snapVal[i]
+							if(i == "isToggled"){
+								isToggled = snapVal[i];
 							}
-							dirData.push(dirFileObj);
+							else {
+								let newPath = key + '/' + i;
+								var dirFileObj = {
+									isFile: true,
+									isToggled: isToggled,
+									path: newPath,
+									data: snapVal[i]
+								}
+								dirData.push(dirFileObj);
+							}
 						}
 						file = {
 							isFile: isFile,
+							isToggled: isToggled,
 							path: key,
 							data: dirData
 						}
@@ -46,11 +53,11 @@ export class FileService {
 					else {
 						file = {
 							isFile: isFile,
+							isToggled: false,
 							path: key,
 							data: snapVal
 						}
 					}
-					// console.log(file);
 					tempArr.push(file);
 				});
 				observer.next(tempArr);
@@ -102,7 +109,4 @@ export class FileService {
 			})
 		})
 	}
-
-
-
 }

@@ -8,6 +8,7 @@ import { FileService } from './file.service';
 import { CodemirrorComponent } from 'ng2-codemirror';
 import 'firebase/database';
 import { environment } from '../environments/environment';
+
 // #region External JS methods
 declare function showModalError(message, modalId): any;
 declare function closeModal(modalId): any;
@@ -46,15 +47,6 @@ export class AppComponent {
    }
 
   ngOnInit(){
-    var firebaseConfig = {
-      apiKey: "AIzaSyASvevZqe3FQvDIsdFmE3KeCRvKMBXffjU",
-      authDomain: "cs499-team-4.firebaseapp.com",
-      databaseURL: "https://cs499-team-4.firebaseio.com",
-      projectId: "cs499-team-4",
-      storageBucket: "files.cloud-code.net",
-      messagingSenderId: "824045995979"
-    };
-
     this.ref = firebase.database().ref();
     this.editFileName();
     this.populateFileNamesArr();
@@ -134,10 +126,12 @@ export class AppComponent {
     let returnValue = this.parseFileName(newFileName);
     let newDirName = form.value["toDirectory"]
     var newFileRef;
-    if(newDirName == " "){
+    if(newDirName == "" || newDirName == null || newDirName == undefined){
+      console.log("No directory specified");
       newFileRef = this.ref.child('test-files').push();
     }
     else {
+      console.log("blah blah blah");
       newFileRef = this.ref.child('test-files').child(newDirName).push();
     }
 
@@ -162,6 +156,19 @@ export class AppComponent {
       closeModal('#newDirModal');
     }
   }
+
+  dirDeleted(form : NgForm) {
+    console.log(form.value);
+    let dirToDelete = form.value["toDirectory"];
+    if(dirToDelete == ""){
+      console.log("none to delete");
+    }
+    else {
+      this.events.publish('directory:deleted', dirToDelete);
+      closeModal('#deleteDirModal');
+    }
+  }
+
 
   collapse(){
     collapseSidebar(this.isCollapsed);
