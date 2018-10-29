@@ -25,7 +25,7 @@ declare function toggleClass(isNightMode): any;
 export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = '';
-  currentFileKey = '';
+  currentFilePath = '';
   title = 'test';
   isCollapsed = false;
   isNightMode = true;
@@ -35,13 +35,13 @@ export class AppComponent {
     public events: Events,
     private _fileService: FileService
   ) {
-    events.subscribe('file:toggled', (filename, filekey) => {
+    events.subscribe('file:toggled', (filename, filepath) => {
       this.currentFileName = filename;
-      this.currentFileKey = filekey;
+      this.currentFilePath = filepath;
     });
-    events.subscribe('filename:updated', (filename, filekey) => {
+    events.subscribe('filename:updated', (filename, filepath) => {
       this.currentFileName = filename;
-      this.currentFileKey = filekey;
+      this.currentFilePath = filepath;
     });
    }
 
@@ -210,7 +210,7 @@ export class AppComponent {
         }
         else {
           var updateValues = {"filename": inputArea.value};
-          self.ref.child("files").child(self.currentFileKey).update(updateValues);
+          self.ref.child("test-files").child(self.currentFilePath).update(updateValues);
           self.events.publish('filename:edited', previousFileName, newFileName);
           inputArea.classList.toggle("hidden");
           fileLabel.classList.toggle("hidden");

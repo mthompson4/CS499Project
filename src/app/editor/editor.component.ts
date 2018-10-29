@@ -90,15 +90,13 @@ export class EditorComponent {
       this.changeTheme(wasNightMode);
     });
     events.subscribe('file:deleted', () => { // a file is to be deleted
-      this.deleteFromDatabase();
+      this.deleteFile();
     });
     events.subscribe('directory:deleted', (dirname) => { // a directory is to be deleted
       this.deleteDirectory(dirname);
     });
     events.subscribe('filename:edited', (oldFileName, newFileName) => { // a filename has been edited
-      this.currentFileName = newFileName;
-      this.updateFileInCloud(oldFileName, newFileName);
-      this.changeMode(newFileName);
+      this.filenameEdited(oldFileName, newFileName);
     });
     events.subscribe('file:updateListener', (cmInstance) => { // update the listener for autosave
       var self = this;
@@ -421,26 +419,36 @@ export class EditorComponent {
     });
   }
 
-  // deletes the current file from the database and storage
-  deleteFromDatabase(){
+
+  deleteFile(){
     this.currentFileRef.remove();
     this.deleteFromStorage(this.currentFileName);
-    var self = this;
-    this.ref.child('test-files').once('value').then(function(dataSnapshot) {
-      if(dataSnapshot.val() == null) {
-        self.createFile('untitled', this.ref.child('test-files').push());
-        self.events.publish('filename:updated', 'untitled');
+    // find the index within currently editing files
+    let indexOfFile = this.findNameInEditingFiles(this.currentFileName);
+    if(indexOfFile > -1){
+      // delete the file from the tabs
+      this.editingFilesArray.splice(indexOfFile, 1);
+
+      if(this.editingFilesArray.length == 0){
+        this.loadRandFile();
       }
-      else{
-        dataSnapshot.forEach(function(childSnapshot) {
-          var item = childSnapshot.val();
-          let key  = childSnapshot.key;
-          self.events.publish('filename:updated', item['filename']);
-          self.changeFile(item['filename'], key);
-          return true;
-      });
+      else {
+        let fileToChange = this.editingFilesArray[indexOfFile-1];
+        this.changeFile(fileToChange.name, fileToChange.path);
       }
-    });
+    }
+  }
+
+  filenameEdited(oldFileName, newFileName){
+
+    let index = this.findNameInEditingFiles(oldFileName);
+    if(index > -1){
+      this.editingFilesArray[index].name = newFileName;
+    }
+
+    this.currentFileName = newFileName;
+    this.updateFileInCloud(oldFileName, newFileName);
+    this.changeMode(newFileName);
   }
 
   /**
@@ -450,8 +458,10 @@ export class EditorComponent {
   loadRandFile(){
     var self = this;
     this.ref.child('test-files').once('value').then(function(dataSnapshot) {
+      console.log(dataSnapshot.val());
       if(dataSnapshot.val() == null) {
-        self.createFile('untitled', this.ref.child('test-files').push());
+        let newRef = self.ref.child('test-files').push();
+        self.createFile('untitled', self.ref.child('test-files').push());
         self.events.publish('filename:updated', 'untitled');
       }
       else{
@@ -486,10 +496,17 @@ export class EditorComponent {
       this.changeFile(file.name, file.path);
     }
     else { // user clicks on the delete button
+
+      if(this.editingFilesArray.length <= 1){ // disable deleting of tab if only one tab up
+        return
+      }
       // find the index within currently editing files
       let indexOfFile = this.findNameInEditingFiles(file.name);
       // delete the file from the tabs
       this.editingFilesArray.splice(indexOfFile, 1);
+      if(file.name != this.currentFileName){ // user deletes a tab that is not the one the user is editing
+        return
+      }
       if(this.editingFilesArray.length == 0){
         this.loadRandFile();
       }
