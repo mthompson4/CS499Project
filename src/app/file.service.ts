@@ -12,8 +12,20 @@ export class FileService {
 		this.filesRef = firebase.database().ref().child('test-files');
 	}
 
+	// compares snapshot results based on filename
+	compare(file1, file2){
+		if(file1.data["filename"] < file2.data["filename"]){
+			return -1;
+		}
+		if(file1.data["filename"] > file2.data["filename"]){
+			return 1;
+		}
+		return 0;
+	}
+
 	// gets all the files and their associated metadata
 	getFiles(){
+		var self = this;
 		return new Observable<any>(observer => {
 			this.filesRef.on("value", snapshot => {
 				var tempArr = [];
@@ -42,6 +54,7 @@ export class FileService {
 								dirData.push(dirFileObj);
 							}
 						}
+						dirData.sort(self.compare);
 						file = {
 							isFile: isFile,
 							isToggled: isToggled,
@@ -60,6 +73,7 @@ export class FileService {
 					}
 					tempArr.push(file);
 				});
+				tempArr.sort(this.compare);
 				observer.next(tempArr);
 			})
 		})

@@ -50,9 +50,6 @@ export class FileToggleComponent {
   deleteDir(dirPath){
     this.events.publish('directory:deleted', dirPath);
   }
-  testFunc(){
-    console.log("double clicked");
-  }
 
 	// send the file to the editor that was just clicked in the filelist
 	fileClicked(file){

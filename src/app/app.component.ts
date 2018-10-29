@@ -35,7 +35,6 @@ export class AppComponent {
     public events: Events,
     private _fileService: FileService
   ) {
-    // firebase.initializeApp(environment.firebaseConfig);
     events.subscribe('file:toggled', (filename, filekey) => {
       this.currentFileName = filename;
       this.currentFileKey = filekey;

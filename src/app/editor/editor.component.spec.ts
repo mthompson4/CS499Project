@@ -29,4 +29,11 @@ describe('EditorComponent', () => {
   it(`Should have firebase ref defined'`, () => {
     expect(component.ref).toBeDefined();
   });
+
+  it(`Should return correct value for matchMimeType'`, () => {
+    // expect(component.ref).toBeDefined();
+    let jsMime = component.matchMimeType('test.js');
+    expect(jsMime).toBe("application/javascript");
+  });
+
 });

@@ -84,7 +84,8 @@
             <div class="form-group bg-dark text-white">
               <label for="residingDirectory">Residing Directory</label>
               <select class="form-control bg-dark text-white" id="residingDirectory" name="toDirectory" ngModel>
-                <option value='No Directory'>Do Not Put in Directory</option>
+                <option [ngValue]="null" selected disabled>Choose a Directory</option>
+                <option [ngValue]="null">Top Level Directory (./)</option>
                 <ng-container *ngFor="let dirname of dirNames">
                   <option value="{{ dirname }}">{{ dirname }}</option>
                 </ng-container>
@@ -143,7 +144,7 @@
            <form (ngSubmit)="dirDeleted(a)" #a="ngForm" class="jumbotron bg-dark text-white">
             <div class="form-group bg-dark text-white">
               <select class="form-control bg-dark text-white" name="toDirectory" ngModel>
-                <option [ngValue]="null">Choose a Directory</option>
+                <option [ngValue]="null" selected="selected">Choose a Directory</option>
                 <ng-container *ngFor="let dirname of dirNames">
                   <option value="{{ dirname }}">{{ dirname }}</option>
                 </ng-container>
