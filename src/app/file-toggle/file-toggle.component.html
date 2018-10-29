@@ -1,17 +1,50 @@
 <div class="file-toggler bg-dark text-white" align="left">
 <h3>File List</h3>
 <ul id="file-list-group" class="list-group file-group">
-	<ng-container *ngIf="isNightMode">
-	<li class="list-group-item list-group-item-action border-0 bg-dark text-white" *ngFor="let file of files | async" (click)="fileClicked(file)">
-		<span class="octicon octicon-file-code"></span>
-		<span> {{ file.data["filename"] }}</span>
-	</li>
-	</ng-container>
-	<ng-container *ngIf="!isNightMode">
-	<li class="list-group-item list-group-item-action border-0" *ngFor="let file of files | async" (click)="fileClicked(file)">
-		<span class="octicon octicon-file-code"></span>
-		<span> {{ file.data["filename"] }}</span>
-	</li>
+	<ng-container *ngFor="let file of newFiles">
+		<ng-container *ngIf="file.isFile; then fileElement; else dirElement"></ng-container>
+		<!-- Prints out the directory contents -->
+		<ng-template  #dirElement>
+			<!-- Gets each file within the directory -->
+			<ng-container *ngIf="file.isToggled; then dirExpanded; else dirCollapse"></ng-container>
+				<!-- Initialize the file list condensed -->
+				<ng-template #dirCollapse>
+					<!-- <a (click)="deleteDir(file.path)">Delete</a> -->
+					<li class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(file.path)">
+						<span id="{{ file.path + '-arrow' }}" class="octicon octicon-arrow-right"> </span>
+						<span class="octicon octicon-file-directory"> </span>
+						<span> {{ file.path }}</span>
+					</li>
+					<div id="{{ file.path }}" class="collapse">
+						<li  *ngFor="let item of file.data" class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(item)">
+							<span class="octicon octicon-file-code"></span>
+							<span> {{ item.data["filename"] }} </span>
+						</li>
+					</div>
+				</ng-template>
+				<!-- Initialize the file list already expanded -->
+				<ng-template #dirExpanded>
+					<!-- <a (click)="deleteDir({{file.path}})">Delete</a> -->
+					<li class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(file.path)">
+						<span id="{{ file.path + '-arrow' }}" class="octicon octicon-arrow-down"> </span>
+						<span class="octicon octicon-file-directory"> </span>
+						<span> {{ file.path }} </span>
+					</li>
+					<div id="{{ file.path }}" class="collapse show">
+						<li  *ngFor="let item of file.data" class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(item)">
+							<span class="octicon octicon-file-code"></span>
+							<span> {{ item.data["filename"] }} </span>
+						</li>
+					</div>
+				</ng-template>		
+		</ng-template>	
+		<!-- prints out each file that is outside a directory -->
+		<ng-template #fileElement>
+			<li class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(file)">
+				<span class="octicon octicon-file-code"></span>
+				<span> {{ file.data["filename"] }}</span>
+			</li>
+		</ng-template>
 	</ng-container>
 </ul>
 </div>

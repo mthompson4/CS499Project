@@ -1,13 +1,13 @@
-function closeModal(){
-	$('#newFileModal').modal('hide');
-	$('#newFileModal').on('hidden.bs.modal', function () {
+function closeModal(modalId){
+	$(modalId).modal('hide');
+	$(modalId).on('hidden.bs.modal', function () {
     	$(this).find('form').trigger('reset');
 	});
 }
 
-function showModalError(message){
-	$('#newFileModalError').removeClass('invisible');
-	$('#newFileModalError').html(message);
+function showModalError(message, modalId){
+	$(modalId).removeClass('invisible');
+	$(modalId).html(message);
 }
 
 
@@ -84,3 +84,38 @@ function toggleClass(isNightMode){
 	userList.classList.toggle("text-white");
 
 }
+
+// the on-click function for directories so they show the contents of the directory
+function toggleHelper(dirId, dirRef){
+	let newId = '#' + dirId;
+	let arrowId = dirId + '-arrow';
+	$(newId).on('show.bs.collapse', function(){
+		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
+		document.getElementById(arrowId).classList.add("octicon-arrow-down");
+	}).on('hide.bs.collapse', function(){
+		document.getElementById(arrowId).classList.add("octicon-arrow-right");
+		document.getElementById(arrowId).classList.remove("octicon-arrow-down");
+	});
+	// $(newId).collapse('toggle')
+	if ($(newId).hasClass('collapse') && $(newId).hasClass('show')) {
+		$(newId).collapse('hide');
+		var postData = {
+     		"isToggled": false
+    	};
+    	dirRef.update(postData);
+
+	}
+	else {
+		$(newId).collapse('show');
+		var postData = {
+     		"isToggled": true
+    	};
+    	dirRef.update(postData);
+	}
+}
+
+function testyDblClick(){
+	console.log("double double click");
+}
+
+
