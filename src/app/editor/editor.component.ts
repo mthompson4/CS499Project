@@ -61,6 +61,7 @@ export class EditorComponent {
   currentFileRef: firebase.database.Reference; // reference to the current file in the database
   userId; // userid of the current user
   isSaving: boolean; // boolean that keeps track of whether or not the editor is currently saving
+  isNightMode = true;
 
    /**
    * Represents the text editor class
@@ -88,6 +89,7 @@ export class EditorComponent {
     });
     events.subscribe('color:switched', (wasNightMode) => { // switch between day & night mode
       this.changeTheme(wasNightMode);
+      this.isNightMode = !this.isNightMode;
     });
     events.subscribe('file:deleted', () => { // a file is to be deleted
       this.deleteFile();
@@ -107,6 +109,7 @@ export class EditorComponent {
           self.isSaving = true;
           timeoutHandler = setTimeout(function(){
             self.saveToCloud(self.currentFileName);
+            console.log("Saved!!!");
           }, 5000);
         }
       });
@@ -183,12 +186,14 @@ export class EditorComponent {
     var self = this;
     let path = this.currentFilePath.split('/');
     var fileRef;
-    if(path.length > 1){
-      fileRef = storageRef.child(path[0]).child(filename);
+    if(path.length > 2){
+      console.log("this is happening", path);
+      fileRef = storageRef.child(path[1]).child(filename);
     }
     else {
       fileRef = storageRef.child(filename);
     }
+    console.log(filename, fileRef.toString());
     fileRef.put(myblob).then(function(snapshot) {
       // grab the current timestamp
       let date = new Date();
@@ -301,6 +306,7 @@ export class EditorComponent {
     this.setFileInFirepad(filePath);
     this.changeMode(filename);
     this.updateTimestamp();
+    this.events.publish('file:updateListener', this.cm);
   }
 
   /**
@@ -351,6 +357,7 @@ export class EditorComponent {
     this.currentFileName = filename;
     // TODO: Find better way to do this, but this grabs the end path of the current file
     this.currentFilePath = fileRef.toString().split('https://cs499-team-4.firebaseio.com/test-files')[1];
+    console.log(this.currentFilePath);
     this.saveToCloud(this.currentFileName);
     this.changeFile(filename, this.currentFilePath);
   }
@@ -391,7 +398,10 @@ export class EditorComponent {
     });
   }
 
-
+  /**
+   * Delete the directory from Firebase cloud storage
+   * @param {dirname}: String - the name of the directory to delete
+  */
   deleteDirectoryFromStorage(dirname){
      // Create a reference to the file to delete
     var storageRef = firebase.storage().ref().child('test-files');
@@ -420,6 +430,7 @@ export class EditorComponent {
   }
 
 
+  // Delete the current file and switch to a new one
   deleteFile(){
     this.currentFileRef.remove();
     this.deleteFromStorage(this.currentFileName);
@@ -439,13 +450,16 @@ export class EditorComponent {
     }
   }
 
+  /**
+   * Code that executes if the filename is edited
+   * @param {oldFileName}: String - the name of the old file name
+   * @param {newFileName}: String - the name of the new file name
+  */
   filenameEdited(oldFileName, newFileName){
-
     let index = this.findNameInEditingFiles(oldFileName);
     if(index > -1){
       this.editingFilesArray[index].name = newFileName;
     }
-
     this.currentFileName = newFileName;
     this.updateFileInCloud(oldFileName, newFileName);
     this.changeMode(newFileName);
@@ -478,6 +492,11 @@ export class EditorComponent {
     });
   }
 
+
+  /**
+   * Find the filename in the currently editing files array
+   * @param {filename}: String - the name of the file to find
+  */
   findNameInEditingFiles(filename){
     for(var i=0; i<this.editingFilesArray.length; ++i){
       if(this.editingFilesArray[i].name == filename){
@@ -487,8 +506,12 @@ export class EditorComponent {
     return -1;
 }
 
-  // click handler for when a file tab is clicked. Handles switching and deleting
-  // TODO: See if the tab is actually currently active
+  /**
+   * Click handler for the file editing tabs
+   * Either delete the tab or switch to it
+   * @param {file}: Object - the file object corresponding to the tab
+   * @param {event}: MouseEvent - an event that lets us know which element was clicked
+  */
   setTab(file, event: MouseEvent){
     let clickedElement = event.srcElement;
     if(clickedElement.nodeName == "A"){ // user clicks on the file tab to switch files
@@ -507,10 +530,10 @@ export class EditorComponent {
       if(file.name != this.currentFileName){ // user deletes a tab that is not the one the user is editing
         return
       }
-      if(this.editingFilesArray.length == 0){
+      if(this.editingFilesArray.length == 0){ // if the user isn't editing any files, load a random one
         this.loadRandFile();
       }
-      else {
+      else { // load the adjacent file otherwise
         let fileToChange = this.editingFilesArray[indexOfFile-1];
         this.changeFile(fileToChange.name, fileToChange.path);
       }

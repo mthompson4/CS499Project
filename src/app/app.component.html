@@ -15,38 +15,30 @@
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</a>
               <div class="dropdown-menu bg-dark text-white" aria-labelledby="dropdown10">
-                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#newFileModal"><img src="/assets/open-iconic/svg/plus.svg" width="15" height="15"> New File</a>
-                <!-- <a class="dropdown-item bg-dark text-white" (click)="saveClicked()"><img src="/assets/open-iconic/svg/cloud-upload.svg" width="15" height="15"> Save File</a> -->
-                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#newDirModal" ><img src="/assets/open-iconic/svg/folder.svg" width="15" height="15"> New Directory</a>
-                <a class="dropdown-item bg-dark text-white" (click)="renderFile()"><img src="/assets/open-iconic/svg/eye.svg" width="15" height="15"> Serve File</a>
-                <a class="dropdown-item bg-dark text-white" (click)="deleteFile()"><img src="/assets/open-iconic/svg/delete.svg" width="15" height="15"> Delete File</a>
-                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#deleteDirModal"><img src="/assets/open-iconic/svg/delete.svg" width="15" height="15"> Delete Directory</a>
+                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#newFileModal"><img src="/assets/open-iconic/svg/plus.svg" width="15" height="15"> New File <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">E</a>
+                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#newDirModal" ><img src="/assets/open-iconic/svg/folder.svg" width="15" height="15"> New Directory <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">D</a>
+                <a class="dropdown-item bg-dark text-white" (click)="renderFile()"><img src="/assets/open-iconic/svg/eye.svg" width="15" height="15"> 
+                  Serve File <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">J</a>
+                <a class="dropdown-item bg-dark text-white" (click)="deleteFile()"><img src="/assets/open-iconic/svg/delete.svg" width="15" height="15"> 
+                  Delete File <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">K</a>
+                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#deleteDirModal"><img src="/assets/open-iconic/svg/delete.svg" width="15" height="15"> Delete Directory <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">B</a>
               </div>
             </li>
 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</a>
               <div class="dropdown-menu bg-dark text-white" aria-labelledby="dropdown10">
-                <a class="dropdown-item bg-dark text-white">Undo</a>
-                <a class="dropdown-item bg-dark text-white">Redo</a>
-                <a class="dropdown-item bg-dark text-white">Comment</a>
+                <a class="dropdown-item bg-dark text-white"><img src="/assets/open-iconic/svg/action-undo.svg" width="15" height="15"> Undo</a>
+                <a class="dropdown-item bg-dark text-white"><img src="/assets/open-iconic/svg/action-redo.svg" width="15" height="15"> Redo</a>
+                <a class="dropdown-item bg-dark text-white"><img src="/assets/open-iconic/svg/comment-square.svg" width="15" height="15"> Comment</a>
               </div>
             </li>
 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">View</a>
               <div class="dropdown-menu bg-dark text-white" aria-labelledby="dropdown10">
-                <a id="collapseButton" class="dropdown-item bg-dark text-white" (click)="collapse()">Collapse Side Bar</a>
+                <a id="collapseButton" class="dropdown-item bg-dark text-white" (click)="collapse()"><img src="/assets/open-iconic/svg/menu.svg" width="15" height="15"> <span id="collapseId"> Collapse Side Bar</span></a>
                 <a id="colorModeEnabler" class="dropdown-item bg-dark text-white" (click)="setColorMode()"><img id="modePic" src="/assets/open-iconic/svg/sun.svg" width="15" height="15"><span id="modeLabel"> Enable Day Mode</span></a>
-              </div>
-            </li>
-
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Source Control</a>
-              <div class="dropdown-menu bg-dark text-white" aria-labelledby="dropdown10">
-                <a class="dropdown-item bg-dark text-white">Commit</a>
-                <a class="dropdown-item bg-dark text-white">Push</a>
-                <a class="dropdown-item bg-dark text-white">Pull</a>
               </div>
             </li>
             <li class="nav-item">

@@ -11,6 +11,7 @@ import { CodemirrorModule } from 'ng2-codemirror';
 import { FormsModule } from '@angular/forms';
 import { Events } from 'ionic-angular';
 import { EditorComponent } from './editor/editor.component';
+import { KeyboardShortcutsModule } from 'ng-keyboard-shortcuts';
 import * as firebase from 'firebase';
 
 firebase.initializeApp(environment.firebaseConfig);
@@ -25,7 +26,8 @@ firebase.initializeApp(environment.firebaseConfig);
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
     CodemirrorModule,
-    FormsModule
+    FormsModule,
+    KeyboardShortcutsModule
   ],
   providers: [Events],
   bootstrap: [AppComponent]
