@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { Observable } from 'rxjs';
@@ -21,6 +21,10 @@ export class FileToggleComponent {
 	directories: Array<Object> = [];
 	isNightMode = true;
   ref: firebase.database.Reference;
+
+  @Input() parentId:string;
+  @Input() dataList:any [];
+
 	constructor(
 		db: AngularFireDatabase, 
     private _fileService: FileService,
@@ -32,7 +36,7 @@ export class FileToggleComponent {
 	}
 
   ngOnInit(){
-    this.populateFilesArr();
+    // this.populateFilesArr();
     this.ref = firebase.database().ref();
   }
 
@@ -40,6 +44,11 @@ export class FileToggleComponent {
     this._fileService.getFiles().subscribe(files => 
       this.newFiles = files
     );
+  }
+  removeCurrentLevelItems=(datalist,parentId)=>{
+    //logic here to remove current level items
+    return datalist.filter(item=>item.parentId!=parentId)
+    // return datalist;
   }
 
   toggleDir(dirId){
@@ -57,4 +66,5 @@ export class FileToggleComponent {
 		let filepath = file.path;
 		this.events.publish('file:toggled', filename, filepath);
 	}
+
 }

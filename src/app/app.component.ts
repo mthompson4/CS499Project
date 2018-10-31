@@ -29,11 +29,43 @@ export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = '';
   currentFilePath = '';
+  topLevelDir = 'test-files';
   title = 'test';
   isCollapsed = false;
   isNightMode = true;
   fileNames: Array<String> = [];
   dirNames: Array<String> = [];
+  public filesArr: Array<any> = [];
+
+  // data = [
+  //   {
+  //     "id": 5,
+  //     "name": "First name",
+  //     "parent": 0
+  //   },
+  //   {
+  //     "id": 1,
+  //     "name": "Second name",
+  //     "parent": 5
+  //   },
+  //   {
+  //     "id": 6,
+  //     "name": "Third name",
+  //     "parent": 1
+  //   },
+  //   {
+  //     "id": 15,
+  //     "name": "Fourth name",
+  //     "parent": 0
+  //   },
+  //   {
+  //     "id": 25,
+  //     "name": "Fifth name",
+  //     "parent": 5
+  //   }
+  // ]
+
+
   constructor(
     public events: Events,
     private _fileService: FileService,
@@ -86,6 +118,13 @@ export class AppComponent {
     this.editFileName();
     this.populateFileNamesArr();
     this.populateDirNamesArr();
+    this.populateFilesArr();
+  }
+
+  populateFilesArr(){
+    this._fileService.getFiles().subscribe(files =>
+      this.filesArr = files
+    );
   }
 
   saveClicked(){
