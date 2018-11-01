@@ -125,6 +125,7 @@ function toggleClass(isNightMode){
 function toggleHelper(dirId, dirRef){
 	let newId = '#' + dirId;
 	let arrowId = dirId + '-arrow';
+	console.log(document.getElementById(arrowId));
 	$(newId).on('show.bs.collapse', function(){
 		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
 		document.getElementById(arrowId).classList.add("octicon-arrow-down");

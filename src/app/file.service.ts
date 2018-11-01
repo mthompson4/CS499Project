@@ -97,10 +97,7 @@ export class FileService {
 				const key = data.key
 				let splitPath = dirPath.split('/');
 				let parentNodeId = splitPath[splitPath.length-1];
-				if(key == "isToggled"){
-					console.log('isToggled');
-				}
-				else {
+				if(key != "isToggled"){
 					const snapVal = data.val();
 					var isToggled = false;
 					if(snapVal["filename"] == undefined){ // it's a directory entry
@@ -115,7 +112,8 @@ export class FileService {
 							isFile: false,
 							name: data.key,
 							isToggled: isToggled,
-							absPath: dirPath,
+							absPath: newDirPath,
+							storagePath: newDirPath,
 							parent: parentNodeId
 						}
 						fileArray.push(dirObj)
@@ -123,13 +121,15 @@ export class FileService {
 					}
 					else { // it's a file
 						let filename = snapVal["filename"];
-						let fileAbsPath = dirPath + '/' + filename;
+						let fileAbsPath = dirPath + '/' + key;
+						let storagePath = dirPath + '/' + filename;
 						let file = {
 							id: key,
 							isFile: true,
 							name: snapVal["filename"],
 							isToggled: false,
 							absPath: fileAbsPath,
+							storagePath: storagePath,
 							parent: parentNodeId
 						}
 						fileArray.push(file);

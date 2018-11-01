@@ -37,35 +37,6 @@ export class AppComponent {
   dirNames: Array<String> = [];
   public filesArr: Array<any> = [];
 
-  // data = [
-  //   {
-  //     "id": 5,
-  //     "name": "First name",
-  //     "parent": 0
-  //   },
-  //   {
-  //     "id": 1,
-  //     "name": "Second name",
-  //     "parent": 5
-  //   },
-  //   {
-  //     "id": 6,
-  //     "name": "Third name",
-  //     "parent": 1
-  //   },
-  //   {
-  //     "id": 15,
-  //     "name": "Fourth name",
-  //     "parent": 0
-  //   },
-  //   {
-  //     "id": 25,
-  //     "name": "Fifth name",
-  //     "parent": 5
-  //   }
-  // ]
-
-
   constructor(
     public events: Events,
     private _fileService: FileService,
@@ -197,15 +168,13 @@ export class AppComponent {
     console.log(form.value);
     let newFileName = form.value["fileName"];
     let returnValue = this.parseFileName(newFileName);
-    let newDirName = form.value["toDirectory"]
-    var newFileRef;
-    if(newDirName == "" || newDirName == null || newDirName == undefined){
-      console.log("No directory specified");
-      newFileRef = this.ref.child('test-files').push();
+    let newDir = form.value["toDirectory"]
+    var newFilePath;
+    if(newDir == "" || newDir == null || newDir == undefined){
+      newFilePath = this.topLevelDir;
     }
     else {
-      console.log("blah blah blah");
-      newFileRef = this.ref.child('test-files').child(newDirName).push();
+      newFilePath = newDir.absPath;
     }
 
     if(returnValue[0] == false){
@@ -213,7 +182,7 @@ export class AppComponent {
     }
     else {
       this.currentFileName = newFileName;
-      this.events.publish('file:created', newFileName, newFileRef);
+      this.events.publish('file:created', newFileName, newFilePath);
       closeModal('#newFileModal');
     }
   }

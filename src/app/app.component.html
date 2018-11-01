@@ -52,16 +52,12 @@
     <main role="main" class="container">
       <div id="sideMenu">
         <div id="userlist" class="bg-dark text-white"></div>
-        <!-- <file-toggle></file-toggle> -->
         <div class="file-toggler bg-dark text-white">
         <h3>File List</h3>
           <file-toggle [parentId]="topLevelDir" [dataList]="filesArr"></file-toggle>
         </div>
-
-
       </div>
       <code-editor id="firepad"></code-editor>
-      
 
       <!-- New File Modal -->
       <div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel" aria-hidden="true">

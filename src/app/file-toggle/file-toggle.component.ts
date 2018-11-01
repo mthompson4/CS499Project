@@ -36,23 +36,18 @@ export class FileToggleComponent {
 	}
 
   ngOnInit(){
-    // this.populateFilesArr();
     this.ref = firebase.database().ref();
   }
 
-  populateFilesArr(){
-    this._fileService.getFiles().subscribe(files => 
-      this.newFiles = files
-    );
-  }
+  // Logic from: https://stackblitz.com/edit/angular-jvaawg?file=src%2Fapp%2Ftree.component.ts
   removeCurrentLevelItems=(datalist,parentId)=>{
     //logic here to remove current level items
     return datalist.filter(item=>item.parentId!=parentId)
-    // return datalist;
   }
 
-  toggleDir(dirId){
-    let dirRef = this.ref.child('test-files').child(dirId);
+  toggleDir(dirPath, dirId){
+    let dirRef = this.ref.child(dirPath);
+    console.log("TOGGLING DIR", dirId, dirRef.toString());
     toggleHelper(dirId, dirRef);
   }
 
@@ -62,9 +57,8 @@ export class FileToggleComponent {
 
 	// send the file to the editor that was just clicked in the filelist
 	fileClicked(file){
-		let filename = file.data["filename"];
-		let filepath = file.path;
-		this.events.publish('file:toggled', filename, filepath);
+		this.events.publish('file:toggled', file.name, file.absPath, file.storagePath);
+    console.log("Clicked on file!", file);
 	}
 
 }
