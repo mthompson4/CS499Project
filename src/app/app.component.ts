@@ -93,9 +93,10 @@ export class AppComponent {
   }
 
   populateFilesArr(){
-    this._fileService.getFiles().subscribe(files =>
-      this.filesArr = files
-    );
+    this._fileService.getFiles().subscribe(files => {
+      this.filesArr = files;
+      console.log("got the files");
+    });
   }
 
   saveClicked(){
@@ -164,27 +165,38 @@ export class AppComponent {
   }
 
 
+  // Create a file object when the create file form is completed
   fileCreated(form : NgForm) {
     console.log(form.value);
     let newFileName = form.value["fileName"];
     let returnValue = this.parseFileName(newFileName);
-    let newDir = form.value["toDirectory"]
-    var newFilePath;
-    if(newDir == "" || newDir == null || newDir == undefined){
-      newFilePath = this.topLevelDir;
-    }
-    else {
-      newFilePath = newDir.absPath;
-    }
-
     if(returnValue[0] == false){
        showModalError(returnValue[1], '#newFileModalError');
     }
-    else {
+    else {  
+      let newDirPath = form.value["toDirectory"]
+      let newFileRef = this.ref.child(newDirPath).push();
+
+      let fileAbsPath = newDirPath + '/' + newFileRef.key;
+      let storagePath = newDirPath + '/' + newFileName;
+      let splitPath = newDirPath.split('/');
+      let parentNodeId = splitPath[splitPath.length-1];
+
+      let file = {
+        id: newFileRef.key,
+        isFile: true,
+        name: newFileName,
+        isToggled: false,
+        absPath: fileAbsPath,
+        storagePath: storagePath,
+        parent: parentNodeId,
+        ref: newFileRef
+      }
+
       this.currentFileName = newFileName;
-      this.events.publish('file:created', newFileName, newFilePath);
+      this.events.publish('file:created', file);
       closeModal('#newFileModal');
-    }
+    } 
   }
 
   dirCreated(form : NgForm) {
@@ -253,7 +265,7 @@ export class AppComponent {
         }
         else {
           var updateValues = {"filename": inputArea.value};
-          self.ref.child("test-files").child(self.currentFilePath).update(updateValues);
+          self.ref.child(self.currentFilePath).update(updateValues);
           self.events.publish('filename:edited', previousFileName, newFileName);
           inputArea.classList.toggle("hidden");
           fileLabel.classList.toggle("hidden");

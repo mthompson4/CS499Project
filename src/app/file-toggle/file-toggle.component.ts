@@ -47,7 +47,6 @@ export class FileToggleComponent {
 
   toggleDir(dirPath, dirId){
     let dirRef = this.ref.child(dirPath);
-    console.log("TOGGLING DIR", dirId, dirRef.toString());
     toggleHelper(dirId, dirRef);
   }
 
@@ -57,7 +56,7 @@ export class FileToggleComponent {
 
 	// send the file to the editor that was just clicked in the filelist
 	fileClicked(file){
-		this.events.publish('file:toggled', file.name, file.absPath, file.storagePath);
+		this.events.publish('file:toggled', file);
     console.log("Clicked on file!", file);
 	}
 

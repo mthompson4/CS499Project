@@ -114,7 +114,8 @@ export class FileService {
 							isToggled: isToggled,
 							absPath: newDirPath,
 							storagePath: newDirPath,
-							parent: parentNodeId
+							parent: parentNodeId,
+							ref: self.ref.child(newDirPath)
 						}
 						fileArray.push(dirObj)
 						self.getFilesInDirFromSnap(data, newDirPath, fileArray);
@@ -130,7 +131,8 @@ export class FileService {
 							isToggled: false,
 							absPath: fileAbsPath,
 							storagePath: storagePath,
-							parent: parentNodeId
+							parent: parentNodeId,
+							ref: self.ref.child(fileAbsPath)
 						}
 						fileArray.push(file);
 					}
