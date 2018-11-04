@@ -39,6 +39,20 @@ export class FileToggleComponent {
     this.ref = firebase.database().ref();
   }
 
+  ngAfterViewInit(){
+    console.log("file toggle view init");
+    for(var i=0; i<this.dataList.length; i++){
+      // ex: absPath = test-files/-LQHQtHCL332PHI6zrGy
+      // test-files is top-level dir, so this level will = 0 b/c this file resides in it
+      let fileNestedLevel = this.dataList[i].absPath.split('/').length -2;
+      let filePadding = (15 * fileNestedLevel) + 3;
+      var fileElement = document.getElementById(this.dataList[i].id);
+      if(fileElement != undefined){
+        fileElement.style.paddingLeft = `${filePadding}px`;
+      }
+    }
+  }
+
   // Logic from: https://stackblitz.com/edit/angular-jvaawg?file=src%2Fapp%2Ftree.component.ts
   removeCurrentLevelItems=(datalist,parentId)=>{
     //logic here to remove current level items

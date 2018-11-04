@@ -1,66 +1,33 @@
-<!-- <ng-container *ngIf="isNightMode">
-<div class="file-toggler bg-dark text-white" align="center">
-<h3>File List</h3>
-<ul id="file-list-group" class="list-group file-group" align="left">
-	<ng-container *ngFor="let file of newFiles">
-		<ng-container *ngIf="file.isFile; then fileElement; else dirElement"></ng-container>
-		<ng-template  #dirElement>
-			<ng-container *ngIf="file.isToggled; then dirExpanded; else dirCollapse"></ng-container>
-				<ng-template #dirCollapse>
-					<li class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(file.path)">
-						<span id="{{ file.path + '-arrow' }}" class="octicon octicon-arrow-right"> </span>
-						<span class="octicon octicon-file-directory"> </span>
-						<span> {{ file.path }}</span>
-					</li>
-					<div id="{{ file.path }}" class="collapse">
-						<li  *ngFor="let item of file.data" class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(item)">
-							<span class="octicon octicon-file-code"></span>
-							<span> {{ item.data["filename"] }} </span>
-						</li>
-					</div>
-				</ng-template>
-				<ng-template #dirExpanded>
-					<li class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(file.path)">
-						<span id="{{ file.path + '-arrow' }}" class="octicon octicon-arrow-down"> </span>
-						<span class="octicon octicon-file-directory"> </span>
-						<span> {{ file.path }} </span>
-					</li>
-					<div id="{{ file.path }}" class="collapse show">
-						<li  *ngFor="let item of file.data" class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(item)">
-							<span class="octicon octicon-file-code"></span>
-							<span> {{ item.data["filename"] }} </span>
-						</li>
-					</div>
-				</ng-template>		
-		</ng-template>	
-		<ng-template #fileElement>
-			<li class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(file)">
-				<span class="octicon octicon-file-code"></span>
-				<span> {{ file.data["filename"] }}</span>
-			</li>
-		</ng-template>
-	</ng-container>
-</ul>
-</div>
-</ng-container>
--->
-
-
 <div class="file-list-test" *ngFor="let item of dataList">
 	<ng-container *ngIf="item.parent==parentId">
 	    <ng-container *ngIf="item.isFile; then fileItem; else dirItem"></ng-container>
 	    <ng-template #fileItem>
-	    <li class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(item)">
+<!-- 	    <li id="{{ item.id }}" class="list-group-item list-group-item-action border-0 bg-dark text-white file-item" (click)="fileClicked(item)">
+	    	<span class="octicon octicon-file-code"></span>
+	    	<span> {{item.name}} </span>
+	    	<file-toggle [parentId]="item.id" [dataList]="removeCurrentLevelItems(dataList,parentId)"></file-toggle>
+	    </li> -->
+
+	   	<li id="{{ item.id }}" 
+	   		class="list-group-item list-group-item-action border-0 bg-dark text-white file-item"
+	   		data-html="true"
+   			data-toggle="popover" 
+   			data-trigger="focus"
+   			data-content="<div>BLAH</div>"
+   			title="Popover"
+	   	>
 	    	<span class="octicon octicon-file-code"></span>
 	    	<span> {{item.name}} </span>
 	    	<file-toggle [parentId]="item.id" [dataList]="removeCurrentLevelItems(dataList,parentId)"></file-toggle>
 	    </li>
+
+
 		</ng-template>
 
 		<ng-template #dirItem>
 			<ng-container *ngIf="item.isToggled; then dirExpanded; else dirCollapsed"></ng-container>
 			<ng-template #dirExpanded>
-			    <li class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(item.absPath, item.id)">
+			    <li id="{{ item.id }}" class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(item.absPath, item.id)">
 					<span id="{{ item.id + '-arrow' }}" class="octicon octicon-arrow-down"> </span>
 					<span class="octicon octicon-file-directory"> </span>
 					<span> {{ item.name }}</span>
@@ -70,7 +37,7 @@
 				</div>
 			</ng-template>
 			<ng-template #dirCollapsed>
-			    <li class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(item.absPath, item.id)">
+			    <li id="{{ item.id }}" class="list-group-item list-group-item-action border-0 bg-dark text-white" (click)="toggleDir(item.absPath, item.id)">
 					<span id="{{ item.id + '-arrow' }}" class="octicon octicon-arrow-right"> </span>
 					<span class="octicon octicon-file-directory"> </span>
 					<span> {{ item.name }}</span>
@@ -82,6 +49,15 @@
 		</ng-template>
 	</ng-container>
 </div>
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();   
+});
+</script>
+<!-- <div id="filePopover">
+	<b>Example popover</b> - content
+</div> -->
 
 
 

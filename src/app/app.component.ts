@@ -95,7 +95,6 @@ export class AppComponent {
   populateFilesArr(){
     this._fileService.getFiles().subscribe(files => {
       this.filesArr = files;
-      console.log("got the files");
     });
   }
 
@@ -174,7 +173,10 @@ export class AppComponent {
        showModalError(returnValue[1], '#newFileModalError');
     }
     else {  
-      let newDirPath = form.value["toDirectory"]
+      var newDirPath = form.value["toDirectory"]
+      if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
+        newDirPath = this.topLevelDir;
+      }
       let newFileRef = this.ref.child(newDirPath).push();
 
       let fileAbsPath = newDirPath + '/' + newFileRef.key;
@@ -202,27 +204,41 @@ export class AppComponent {
   dirCreated(form : NgForm) {
     let newDirName = form.value["dirName"];
     let returnValue = this.parseDirName(newDirName);
+    let parentDirPath = form.value["parentDirectory"];
+    var newDirPath;
     if(returnValue[0] == false){
        showModalError(returnValue[1], '#newDirModalError');
     }
     else {
-      this.events.publish('directory:created', newDirName);
+      // Either place the new directory nested or in the top-level directory
+      if(parentDirPath == null || parentDirPath == "" || parentDirPath == undefined){
+        newDirPath = this.topLevelDir + '/' + newDirName;
+      }
+      else { // nest the directory
+        newDirPath = parentDirPath + '/' + newDirName;
+      }
+      let newDirRef = this.ref.child(newDirPath);
+      let pushVals = {
+        "isToggled": false
+      }
+      newDirRef.set(pushVals);
+
       closeModal('#newDirModal');
     }
   }
 
   dirDeleted(form : NgForm) {
     console.log(form.value);
-    let dirToDelete = form.value["toDirectory"];
-    if(dirToDelete == ""){
+    let dirToDeletePath = form.value["toDirectory"];
+    if(dirToDeletePath == ""){
       console.log("none to delete");
     }
     else {
-      this.events.publish('directory:deleted', dirToDelete);
+      console.log(dirToDeletePath);
+      this.events.publish('directory:deleted', dirToDeletePath);
       closeModal('#deleteDirModal');
     }
   }
-
 
   collapse(){
     collapseSidebar(this.isCollapsed);

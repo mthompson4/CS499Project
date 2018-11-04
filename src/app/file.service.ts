@@ -14,70 +14,24 @@ export class FileService {
 
 	// compares snapshot results based on filename
 	compare(file1, file2){
-		if(file1.data["filename"] < file2.data["filename"]){
+
+		// file 1 is a file and file2 is a dir
+		if(file1.isFile == true && file2.isFile == false){
 			return -1;
 		}
-		if(file1.data["filename"] > file2.data["filename"]){
+		if(file1.isFile == false && file2.isFile == true){
+			return 1;
+		}
+
+		if(file1.name < file2.name){
+			return -1;
+		}
+		if(file1.name > file2.name){
 			return 1;
 		}
 		return 0;
 	}
 
-	// gets all the files and their associated metadata
-	// getFiles(){
-	// 	var self = this;
-	// 	return new Observable<any>(observer => {
-	// 		this.ref.on("value", snapshot => {
-	// 			var tempArr = [];
-	// 			snapshot.forEach(function(data) {
-	// 				const key = data.key
-	// 				const snapVal = data.val();
-	// 				var isFile = true;
-	// 				var dirData = [];
-	// 				var file;
-	// 				var isToggled = false;
-	// 				if(snapVal["filename"] == undefined){
-	// 					isFile = false;
-	// 					for(var i in snapVal){
-	// 						// console.log(i, snapVal[i]);
-	// 						if(i == "isToggled"){
-	// 							isToggled = snapVal[i];
-	// 						}
-	// 						else {
-	// 							let newPath = key + '/' + i;
-	// 							var dirFileObj = {
-	// 								isFile: true,
-	// 								isToggled: isToggled,
-	// 								path: newPath,
-	// 								data: snapVal[i]
-	// 							}
-	// 							dirData.push(dirFileObj);
-	// 						}
-	// 					}
-	// 					dirData.sort(self.compare);
-	// 					file = {
-	// 						isFile: isFile,
-	// 						isToggled: isToggled,
-	// 						path: key,
-	// 						data: dirData
-	// 					}
-	// 					// console.log("file data", file);
-	// 				}
-	// 				else {
-	// 					file = {
-	// 						isFile: isFile,
-	// 						isToggled: false,
-	// 						path: key,
-	// 						data: snapVal
-	// 					}
-	// 				}
-	// 				tempArr.push(file);
-	// 			});
-	// 			tempArr.sort(this.compare);
-	// 			observer.next(tempArr);
-	// 		})
-	// 	})
-	// }
 	getFiles(){
 		var self = this;
 		return new Observable<any>(observer => {
@@ -85,6 +39,7 @@ export class FileService {
 				var tempArr = [];
 				self.getFilesInDirFromSnap(snapshot, 'test-files', tempArr);
 				console.log("DONE", tempArr);
+				tempArr.sort(this.compare);
 				observer.next(tempArr);
 			})
 		})

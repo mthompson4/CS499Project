@@ -83,11 +83,7 @@ export class EditorComponent {
       this.saveToCloud(this.currentFile);
     });
     events.subscribe('file:created', (file) => { // a new file is created
-      // this.createFile(file);
       this.fileCreated(file);
-    });
-    events.subscribe('directory:created', (dirname) => { // a directory is created
-      this.createDirectory(dirname);
     });
     events.subscribe('file:rendered', () => { // the file is to be served
       this.serveFile();
@@ -99,8 +95,8 @@ export class EditorComponent {
     events.subscribe('file:deleted', () => { // a file is to be deleted
       this.deleteFile(this.currentFile);
     });
-    events.subscribe('directory:deleted', (dirname) => { // a directory is to be deleted
-      this.deleteDirectory(dirname);
+    events.subscribe('directory:deleted', (dirPath) => { // a directory is to be deleted
+      this.deleteDirectory(dirPath);
     });
     events.subscribe('filename:edited', (oldFileName, newFileName) => { // a filename has been edited
       this.filenameEdited(oldFileName, newFileName);
@@ -209,6 +205,7 @@ export class EditorComponent {
     });
     // putString saves the file to firebase storage
     var self = this;
+    console.log("Saving File To Cloud at: ", storageRef.toString());
     storageRef.put(myblob).then(function(snapshot) {
       // grab the current timestamp
       let date = new Date();
@@ -231,6 +228,7 @@ export class EditorComponent {
   deleteFromStorage(file){
     // Create a reference to the file to delete
     var storageRef = firebase.storage().ref().child(file.storagePath);
+    console.log("Deleting from storage at",storageRef);
     storageRef.delete().then(function() {
       // File deleted successfully
       console.log('file deleted successfully!');
@@ -363,30 +361,21 @@ export class EditorComponent {
    * @param {file}: Object - The file object 
   */
   fileCreated(file){
+    var postData = {
+      "filename": file.name
+    };
+    file.ref.set(postData);
     this.setCurrentFile(file);
     this.saveToCloud(file);
     this.changeFile(file);
   }
 
-
-
   /**
    * Creates a directory and stores it in the firebase database
-   * @param {dirname}: String - the name of the directory to create
+   * @param {dirPath}: String - the path of the directory to delete
   */
-  createDirectory(dirname){
-    // TODO: Create nested directories
-    var fileRef = this.ref.child(this.topLevelDirectory).child(dirname).set(true);
-  }
-
-  /**
-   * Creates a directory and stores it in the firebase database
-   * @param {dirname}: String - the name of the directory to create
-  */
-  deleteDirectory(dirname){
-    let dirRef = this.ref.child(this.topLevelDirectory).child(dirname);
-    dirRef.remove();
-    this.deleteDirectoryFromStorage(dirname);
+  deleteDirectory(dirPath){
+    this.deleteDirectoryFromStorage(dirPath);
     this.loadRandFile();
   }
 
@@ -394,29 +383,32 @@ export class EditorComponent {
    * Delete the directory from Firebase cloud storage
    * @param {dirname}: String - the name of the directory to delete
   */
-  deleteDirectoryFromStorage(dirname){
+  deleteDirectoryFromStorage(dirPath){
      // Create a reference to the file to delete
-    var storageRef = firebase.storage().ref().child(this.topLevelDirectory);
-    var dirFileRef;
-    
-    // Delete the file
-    var self = this;
-    this.ref.child(this.topLevelDirectory).child(dirname).once('value').then(function(dataSnapshot) {
-      if(dataSnapshot.val() != null) {
-        dataSnapshot.forEach(function(childSnapshot) {
-          var item = childSnapshot.val();
-          var filename = item['filename'];
-          if(filename != undefined){
-            dirFileRef = storageRef.child(dirname).child(filename);
-            dirFileRef.delete().then(function() {
-            // File deleted successfully
-              console.log('directory deleted successfully!');
-            }).catch(function(error) {
-              // an error occurred!
-              console.log('error deleting directory', error);
+    var storageRef = firebase.storage().ref();
+    let dirPathSplit = dirPath.split('/');
+    let dirName = dirPathSplit[dirPathSplit.length - 1]; // dirname is the last name in path
+    var hasDeleted = false;
+    this.hasInitialized = false;
+    this._fileService.getFiles().subscribe(files => {
+      if(this.hasInitialized == false && files.length > 0){
+        for(var i=0; i<files.length; ++i){
+          if(files[i].storagePath.includes(dirName) && files[i].isFile == true){
+            // check to see if user is currently editing that file
+            let indexOfFile = this.findNameInEditingFiles(files[i].name);
+            if(indexOfFile > -1){
+              this.editingFilesArray.splice(indexOfFile, 1);
+            }
+            let fileStorageRef = storageRef.child(files[i].storagePath);
+            console.log("REMOVING FILE", fileStorageRef.toString());
+            fileStorageRef.delete().then(function (){
+              console.log('file deleted successfully!');
+            }).catch(function(error){
+              console.log('error deleting file', error);
             });
           }
-      });
+        }
+       this.ref.child(dirPath).remove();
       }
     });
   }
@@ -456,34 +448,6 @@ export class EditorComponent {
     this.updateFileInCloud(oldFileName, newFileName);
     this.changeMode(newFileName);
   }
-
-  /**
-   * searches the file list to either load a given file in the list,
-   * or create an untitled file if none exist
-  */
-  // loadRandFile(){
-  //   var self = this;
-  //   this.ref.child(this.topLevelDirectory).once('value').then(function(dataSnapshot) {
-  //     console.log(dataSnapshot.val());
-  //     if(dataSnapshot.val() == null) {
-  //       let newRef = self.ref.child(self.topLevelDirectory).push();
-  //       // self.createFile('untitled', self.ref.child(self.topLevelDirectory).push());
-  //       self.events.publish('filename:updated', 'untitled');
-  //     }
-  //     else{
-  //       dataSnapshot.forEach(function(childSnapshot) {
-  //         var item = childSnapshot.val();
-  //         let filepath  = childSnapshot.key;
-  //         let filename = item["filename"];
-  //         if(filename != undefined){
-  //           //self.changeFile(filename, filepath, filepath);
-  //         }
-  //         return true;
-  //       });
-  //     }
-  //   });
-  // }
-
 
   /**
    * Find the filename in the currently editing files array

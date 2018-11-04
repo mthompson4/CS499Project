@@ -17,6 +17,9 @@
     .btn{
       margin-left:10px;
     }
+    .shortcut {
+      padding-left: 30px;
+    }
 
     #fileNameLabel {
       display: inline-block;
@@ -35,4 +38,19 @@
       display:inline-block;
       max-height: 300px;
       overflow: scroll;
+    }
+    .vcenter {
+      display: inline-block;
+      vertical-align: middle;
+      float: none;
+      height: 32px;
+      font-size: 14px;
+    }
+    .shortcut {
+      display: inline-block;
+      vertical-align: middle;
+      float: none;
+      height: 24px;
+      font-size: 12px;
+      padding-top: 3px;
     }

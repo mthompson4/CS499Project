@@ -11,19 +11,68 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</a>
-              <div class="dropdown-menu bg-dark text-white" aria-labelledby="dropdown10">
-                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#newFileModal"><img src="/assets/open-iconic/svg/plus.svg" width="15" height="15"> New File <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">E</a>
-                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#newDirModal" ><img src="/assets/open-iconic/svg/folder.svg" width="15" height="15"> New Directory <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">D</a>
-                <a class="dropdown-item bg-dark text-white" (click)="renderFile()"><img src="/assets/open-iconic/svg/eye.svg" width="15" height="15"> 
-                  Serve File <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">J</a>
-                <a class="dropdown-item bg-dark text-white" (click)="deleteFile()"><img src="/assets/open-iconic/svg/delete.svg" width="15" height="15"> 
-                  Delete File <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">K</a>
-                <a class="dropdown-item bg-dark text-white" data-toggle="modal" data-target="#deleteDirModal"><img src="/assets/open-iconic/svg/delete.svg" width="15" height="15"> Delete Directory <img src="/assets/open-iconic/svg/command.svg" width="15" height="15">B</a>
+        <ul class="navbar-nav">
+          <!-- File dropdown -->
+          <li class="nav-item dropdown bg-dark text-white">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  File
+              </a>
+              <div class="dropdown-menu bg-dark text-white" aria-labelledby="dropdown10" style="width:300px" aria-labelledby="navbarDropdown">
+                <div class="container container-sm bg-dark text-white">
+                  
+                  <!-- Add a new File -->
+                  <div class="row bg-dark text-white">
+                    <div class="col-sm-6 bg-dark text-white">
+                      <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#newFileModal"><img src="/assets/open-iconic/svg/plus.svg" width="14" height="14"> New File</a>
+                    </div>
+                    <div class="col-sm-4 bg-dark text-white">
+                      <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="14" height="14"> + E</span>
+                    </div>     
+                  </div>
+
+                  <!-- Add a new folder -->
+                  <div class="row bg-dark text-white">
+                    <div class="col-md-6 bg-dark text-white">
+                      <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#newDirModal"><img src="/assets/open-iconic/svg/folder.svg" width="14" height="14"> New Folder</a>
+                    </div>
+                    <div class="col-sm-4 bg-dark text-white">
+                      <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="14" height="14"> + D</span>
+                    </div>     
+                  </div>
+
+                <!-- Serve the current file -->
+                <div class="row bg-dark text-white">
+                    <div class="col-sm-6 bg-dark text-white">
+                      <a (click)="renderFile()" class="dropdown-item vcenter bg-dark text-white"><img src="/assets/open-iconic/svg/eye.svg" width="14" height="14"> Serve File</a>
+                    </div>
+                    <div class="col-sm-4 bg-dark text-white">
+                      <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="14" height="14"> + J</span>
+                    </div>     
+                </div>
+              
+              <!-- Delete the current file -->
+              <div class="row bg-dark text-white">
+                    <div class="col-sm-6 bg-dark text-white">
+                      <a (click)="deleteFile()" class="dropdown-item vcenter bg-dark text-white"><img src="/assets/open-iconic/svg/delete.svg" width="14" height="14"> Delete File</a>
+                    </div>
+                    <div class="col-sm-4 bg-dark text-white">
+                      <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="14" height="14"> + K</span>
+                    </div>     
               </div>
-            </li>
+            
+              <!-- Delete a folder -->
+              <div class="row bg-dark text-white">
+                <div class="col-md-6 bg-dark text-white">
+                  <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#deleteDirModal"><img src="/assets/open-iconic/svg/folder.svg" width="14" height="14"> Delete Folder</a>
+                </div>
+                <div class="col-sm-4 bg-dark text-white">
+                  <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="14" height="14"> + B</span>
+                </div>     
+              </div>
+
+            </div>
+          </div>
+          </li>
 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</a>
@@ -79,9 +128,9 @@
               <label for="residingDirectory">Residing Directory</label>
               <select class="form-control bg-dark text-white" id="residingDirectory" name="toDirectory" ngModel>
                 <option [ngValue]="null" selected disabled>Choose a Directory</option>
-                <option [ngValue]="null">Top Level Directory (./)</option>
-                <ng-container *ngFor="let dirname of dirNames">
-                  <option value="{{ dirname }}">{{ dirname }}</option>
+                <option [ngValue]="topLevelDir">Top Level Directory (./)</option>
+                <ng-container *ngFor="let file of filesArr">
+                  <option *ngIf="!file.isFile" value="{{ file.absPath }}">{{ file.name }} ({{file.absPath.replace('test-files', '.')}})</option>
                 </ng-container>
               </select>
             </div>
@@ -113,6 +162,16 @@
               <input id="dirInput" class="form-control bg-dark text-white" type="text" name="dirName" ngModel aria-describedby="dirHelp" placeholder="Enter Directory Name">
               <small id="dirHelp" class="form-text text-muted bg-dark text-white">Directory names cannot contain spaces</small>
             </div>
+            <div class="form-group bg-dark text-white">
+              <label for="residingDirectory">Residing Directory</label>
+              <select class="form-control bg-dark text-white" id="residingDirectory" name="parentDirectory" ngModel>
+                <option [ngValue]="null" selected disabled>Choose a Directory</option>
+                <option [ngValue]="null">Top Level Directory (./)</option>
+                <ng-container *ngFor="let file of filesArr">
+                  <option *ngIf="!file.isFile" value="{{ file.absPath }}">{{ file.name }} ({{file.absPath.replace('test-files', '.')}})</option>
+                </ng-container>
+              </select>
+            </div>
             <div id="newDirModalError" class="alert alert-danger invisible" role="alert">
               Invalid Directory Name
             </div>
@@ -139,8 +198,8 @@
             <div class="form-group bg-dark text-white">
               <select class="form-control bg-dark text-white" name="toDirectory" ngModel>
                 <option [ngValue]="null" selected="selected">Choose a Directory</option>
-                <ng-container *ngFor="let dirname of dirNames">
-                  <option value="{{ dirname }}">{{ dirname }}</option>
+                <ng-container *ngFor="let file of filesArr">
+                  <option *ngIf="!file.isFile" value="{{ file.absPath }}">{{ file.name }} ({{file.absPath.replace('test-files', '.')}})</option>
                 </ng-container>
               </select>
             </div>

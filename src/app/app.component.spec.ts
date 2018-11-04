@@ -34,4 +34,14 @@ describe('AppComponent', () => {
   it(`Should have title test'`, () => {
     expect(component.title).toBe('test');
   });
+  it(`Should parse file name correctly'`, () => {
+    // expect(component.title).toBe('test');
+    var parseResults;
+    parseResults = component.parseFileName("test.txt");
+    expect(parseResults[0]).toBeTruthy();
+
+    parseResults = component.parseFileName("test");
+    expect(parseResults[0]).toBeFalsy();
+
+  });
 });
