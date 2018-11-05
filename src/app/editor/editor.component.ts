@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ViewChild, Input } from '@angular/core';
 import { ActivatedRoute, Router, Event } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Events } from 'ionic-angular';
+import { CookieService } from 'ngx-cookie-service';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
@@ -74,6 +75,7 @@ export class EditorComponent {
   constructor(
     public events: Events,
     private _fileService: FileService,
+    public cookie: CookieService
   ) {
     // define the events to subscribe to and the code the fires on those events
     events.subscribe('file:toggled', (file) => { // A user selects a different file in the list

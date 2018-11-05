@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
+import { CookieService } from 'ngx-cookie-service';
 import { Observable } from 'rxjs';
 import { FileService } from '../file.service';
 import { map } from 'rxjs/operators';
@@ -29,7 +30,8 @@ export class FileToggleComponent {
 	constructor(
 		db: AngularFireDatabase, 
     private _fileService: FileService,
-		public events: Events
+    public events: Events, 
+    public cookie: CookieService
 	) {
     	events.subscribe('color:switched', (toMode) => {
       		this.isNightMode = !(this.isNightMode);
