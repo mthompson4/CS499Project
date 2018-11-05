@@ -9,13 +9,16 @@ import * as firebase from 'firebase';
 import { FormsModule } from '@angular/forms';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, AngularFireModule.initializeApp(environment.firebaseConfig)],
+      imports: [FormsModule, AngularFireModule.initializeApp(environment.firebaseConfig), NgbModule],
       declarations: [ AppComponent, CodemirrorComponent, EditorComponent, FileToggleComponent],
       providers: [Events, AngularFireDatabase]
     })
@@ -31,17 +34,19 @@ describe('AppComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it(`Should have title test'`, () => {
-    expect(component.title).toBe('test');
-  });
   it(`Should parse file name correctly'`, () => {
-    // expect(component.title).toBe('test');
     var parseResults;
-    parseResults = component.parseFileName("test.txt");
+    parseResults = component.parseFileName("test.txt", "test-files");
     expect(parseResults[0]).toBeTruthy();
 
-    parseResults = component.parseFileName("test");
+    parseResults = component.parseFileName("test", "test-files");
     expect(parseResults[0]).toBeFalsy();
 
   });
+
+  it(`should work this file`, () => {
+    var parseResults;
+    parseResults = component.parseFileName("thisFile.py", "test-files");
+    expect(parseResults[0]).toBeTruthy();
+  })
 });

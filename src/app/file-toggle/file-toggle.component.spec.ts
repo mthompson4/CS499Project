@@ -6,6 +6,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environment';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 describe('FileToggleComponent', () => {
   let component: FileToggleComponent;
@@ -13,7 +14,7 @@ describe('FileToggleComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [FormsModule, AngularFireModule.initializeApp(environment.firebaseConfig)],
+      imports: [FormsModule, AngularFireModule.initializeApp(environment.firebaseConfig), NgbModule],
       declarations: [ FileToggleComponent ],
       providers: [Events, AngularFireDatabase]
     })

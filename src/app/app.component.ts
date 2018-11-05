@@ -298,7 +298,13 @@ export class AppComponent {
           fileLabel.classList.toggle("hidden");
           self.currentFileName = newFileName;
         }
-       }
+      }
+      else if(event.keyCode == 27){
+        inputArea.classList.toggle("hidden");
+        fileLabel.classList.toggle("hidden");
+      }
+
+
      });
   }
 }
