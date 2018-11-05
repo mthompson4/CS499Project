@@ -85,15 +85,15 @@ export class EditorComponent {
     events.subscribe('file:created', (file) => { // a new file is created
       this.fileCreated(file);
     });
-    events.subscribe('file:rendered', () => { // the file is to be served
-      this.serveFile();
+    events.subscribe('file:rendered', (file) => { // the file is to be served
+      this.serveFile(file);
     });
     events.subscribe('color:switched', (wasNightMode) => { // switch between day & night mode
       this.changeTheme(wasNightMode);
       this.isNightMode = !this.isNightMode;
     });
-    events.subscribe('file:deleted', () => { // a file is to be deleted
-      this.deleteFile(this.currentFile);
+    events.subscribe('file:deleted', (file) => { // a file is to be deleted
+      this.deleteFile(file);
     });
     events.subscribe('directory:deleted', (dirPath) => { // a directory is to be deleted
       this.deleteDirectory(dirPath);
@@ -255,8 +255,8 @@ export class EditorComponent {
   }
 
   // Render the current file in a new browser window
-  serveFile(){
-    var url = `http://files.cloud-code.net/${this.currentFile.storagePath}`;;
+  serveFile(file){
+    var url = `http://files.cloud-code.net/${file.storagePath}`;;
     window.open(url, '_blank');
   }
 
@@ -276,7 +276,7 @@ export class EditorComponent {
   */
   changeFile(file){
     // create an object containing the filename & path to be stored for the editor tab interface
-    this.events.publish('filename:updated', file.name, file.absPath);
+    this.events.publish('filename:updated', file);
     if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {
       this.editingFilesArray.push(file);
     }
@@ -471,7 +471,7 @@ export class EditorComponent {
   setTab(file, event: MouseEvent){
     let clickedElement = event.srcElement;
     if(clickedElement.nodeName == "A"){ // user clicks on the file tab to switch files
-      this.events.publish('filename:updated', file.name, file.absPath);
+      this.events.publish('filename:updated', file);
       this.changeFile(file);
     }
     else { // user clicks on the delete button

@@ -21,6 +21,7 @@ export class FileToggleComponent {
 	directories: Array<Object> = [];
 	isNightMode = true;
   ref: firebase.database.Reference;
+  currentPopover: any;
 
   @Input() parentId:string;
   @Input() dataList:any [];
@@ -59,6 +60,20 @@ export class FileToggleComponent {
     return datalist.filter(item=>item.parentId!=parentId)
   }
 
+  onRightClick(item, popover) {
+    console.log("right clicked", item);
+    if(this.currentPopover == undefined){
+      popover.open();
+      this.currentPopover = popover
+    }
+    else {
+      this.currentPopover.close();
+      this.currentPopover = popover;
+      popover.open();
+    }
+    return false;
+  }
+
   toggleDir(dirPath, dirId){
     let dirRef = this.ref.child(dirPath);
     toggleHelper(dirId, dirRef);
@@ -73,5 +88,17 @@ export class FileToggleComponent {
 		this.events.publish('file:toggled', file);
     console.log("Clicked on file!", file);
 	}
+
+  setServeFile(file){
+    this.events.publish('file:rendered', file);
+  }
+
+  setDeleteFile(file){
+    this.events.publish('file:deleted', file);
+  }
+
+  setDeleteDirectory(dir){
+    this.events.publish('directory:deleted', dir.absPath);
+  }
 
 }

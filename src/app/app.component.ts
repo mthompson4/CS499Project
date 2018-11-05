@@ -28,7 +28,7 @@ declare function toggleClass(isNightMode): any;
 export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = '';
-  currentFilePath = '';
+  currentFile: any;
   topLevelDir = 'test-files';
   title = 'test';
   isCollapsed = false;
@@ -74,13 +74,16 @@ export class AppComponent {
 
     ]);
 
-    events.subscribe('file:toggled', (filename, filepath) => {
-      this.currentFileName = filename;
-      this.currentFilePath = filepath;
+    // User clicks a file from the file list
+    events.subscribe('file:toggled', (file) => {
+      this.currentFileName = file.name;
+      this.currentFile = file;
     });
-    events.subscribe('filename:updated', (filename, filepath) => {
-      this.currentFileName = filename;
-      this.currentFilePath = filepath;
+
+    // User changes a file from the tabs
+    events.subscribe('filename:updated', (file) => {
+      this.currentFileName = file.name;
+      this.currentFile = file;
     });
    }
 
@@ -103,7 +106,7 @@ export class AppComponent {
   }
 
   renderFile(){
-    this.events.publish('file:rendered');
+    this.events.publish('file:rendered', this.currentFile);
   }
 
   populateFileNamesArr(){
@@ -252,7 +255,7 @@ export class AppComponent {
   }
 
   deleteFile(){
-    this.events.publish('file:deleted');
+    this.events.publish('file:deleted', this.currentFile);
   }
 
   editFileName(){
@@ -281,7 +284,7 @@ export class AppComponent {
         }
         else {
           var updateValues = {"filename": inputArea.value};
-          self.ref.child(self.currentFilePath).update(updateValues);
+          self.ref.child(self.currentFile.absPath).update(updateValues);
           self.events.publish('filename:edited', previousFileName, newFileName);
           inputArea.classList.toggle("hidden");
           fileLabel.classList.toggle("hidden");
