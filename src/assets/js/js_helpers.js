@@ -8,6 +8,16 @@
 */
 function closeModal(modalId){
 	$(modalId).modal('hide');
+}
+
+// listener for modal closing / opening, reset the form
+function modalListener(modalId, modalErrorId){
+
+	// Hide the error when it appears
+	$(modalId).on('show.bs.modal', function () {
+		$(modalErrorId).addClass('invisible');
+	});
+
 	// reset the form when it closes
 	$(modalId).on('hidden.bs.modal', function () {
     	$(this).find('form').trigger('reset');

@@ -12,6 +12,7 @@ import { KeyboardShortcutsService } from 'ng-keyboard-shortcuts';
 
 // #region External JS methods
 declare function showModalError(message, modalId): any;
+declare function modalListener(modalId, modalErrorId): any;
 declare function closeModal(modalId): any;
 declare function presentModal(modalId): any;
 declare function filenameEditor(): any;
@@ -93,6 +94,7 @@ export class AppComponent {
     this.populateFileNamesArr();
     this.populateDirNamesArr();
     this.populateFilesArr();
+    modalListener('#newFileModal', '#newFileModalError');
   }
 
   populateFilesArr(){
@@ -122,7 +124,7 @@ export class AppComponent {
   }
 
   // parse the inputted file name to see if it is valid
-  parseFileName(filename){
+  parseFileName(filename, toDirectory){
     var errorCode;
     var isValid = true;
     if(filename == undefined || filename == ''){
@@ -138,10 +140,16 @@ export class AppComponent {
       isValid = false;
     }
     else {
-      // check for duplicate file names
-      for(var i=0; i<this.fileNames.length; ++i){
-        if(filename.toLowerCase() == this.fileNames[i].toLowerCase()){
-          return [false, "Filename already exists!"];
+      // check for duplicate file names in directories
+      for(var i=0; i<this.filesArr.length; ++i){
+        console.log(this.filesArr[i].name, this.filesArr[i].storagePath);
+        if(this.filesArr[i].name.toLowerCase() == filename.toLowerCase()){
+          // File has duplicate file name
+          console.log("Checking paths", this.filesArr[i].storagePath, toDirectory);
+          let newAbsPath = toDirectory + '/' + filename;
+          if(this.filesArr[i].storagePath == newAbsPath){
+            return [false, "Filename already exists in this directory"];
+          }
         }
       }
     }
@@ -170,16 +178,16 @@ export class AppComponent {
   // Create a file object when the create file form is completed
   fileCreated(form : NgForm) {
     console.log(form.value);
+    var newDirPath = form.value["toDirectory"]
+    if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
+        newDirPath = this.topLevelDir;
+    }
     let newFileName = form.value["fileName"];
-    let returnValue = this.parseFileName(newFileName);
+    let returnValue = this.parseFileName(newFileName, newDirPath);
     if(returnValue[0] == false){
        showModalError(returnValue[1], '#newFileModalError');
     }
     else {  
-      var newDirPath = form.value["toDirectory"]
-      if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
-        newDirPath = this.topLevelDir;
-      }
       let newFileRef = this.ref.child(newDirPath).push();
 
       let fileAbsPath = newDirPath + '/' + newFileRef.key;
@@ -276,7 +284,7 @@ export class AppComponent {
           return
         }
 
-        let returnValue = self.parseFileName(newFileName);
+        let returnValue = self.parseFileName(newFileName, self.currentFile.storagePath);
         if(returnValue[0] == false){
           alert(returnValue[1]);
           inputArea.classList.toggle("hidden");
