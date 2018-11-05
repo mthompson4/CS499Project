@@ -39,9 +39,9 @@ export class FileToggleComponent {
   }
 
   ngAfterViewInit(){
-    if(this.cookie.get("developer-mode") == "day") {
+    /*if(this.cookie.get("developer-mode") == "day") {
       this.isNightMode = false;
-    }
+    }*/
   }
 
   populateFilesArr(){
