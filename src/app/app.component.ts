@@ -13,6 +13,7 @@ import { KeyboardShortcutsService } from 'ng-keyboard-shortcuts';
 
 // #region External JS methods
 declare function showModalError(message, modalId): any;
+declare function modalListener(modalId, modalErrorId): any;
 declare function closeModal(modalId): any;
 declare function presentModal(modalId): any;
 declare function filenameEditor(): any;
@@ -29,12 +30,15 @@ declare function toggleClass(isNightMode): any;
 export class AppComponent {
   ref: firebase.database.Reference;
   currentFileName = '';
-  currentFilePath = '';
+  currentFile: any;
+  topLevelDir = 'test-files';
   title = 'test';
   isCollapsed = false;
   isNightMode = true;
   fileNames: Array<String> = [];
   dirNames: Array<String> = [];
+  public filesArr: Array<any> = [];
+
   constructor(
     public events: Events,
     public cookie: CookieService, 
@@ -73,13 +77,16 @@ export class AppComponent {
 
     ]);
 
-    events.subscribe('file:toggled', (filename, filepath) => {
-      this.currentFileName = filename;
-      this.currentFilePath = filepath;
+    // User clicks a file from the file list
+    events.subscribe('file:toggled', (file) => {
+      this.currentFileName = file.name;
+      this.currentFile = file;
     });
-    events.subscribe('filename:updated', (filename, filepath) => {
-      this.currentFileName = filename;
-      this.currentFilePath = filepath;
+
+    // User changes a file from the tabs
+    events.subscribe('filename:updated', (file) => {
+      this.currentFileName = file.name;
+      this.currentFile = file;
     });
    }
 
@@ -88,6 +95,14 @@ export class AppComponent {
     this.editFileName();
     this.populateFileNamesArr();
     this.populateDirNamesArr();
+    this.populateFilesArr();
+    modalListener('#newFileModal', '#newFileModalError');
+  }
+
+  populateFilesArr(){
+    this._fileService.getFiles().subscribe(files => {
+      this.filesArr = files;
+    });
   }
 
   ngAfterViewInit(){
@@ -102,7 +117,7 @@ export class AppComponent {
   }
 
   renderFile(){
-    this.events.publish('file:rendered');
+    this.events.publish('file:rendered', this.currentFile);
   }
 
   populateFileNamesArr(){
@@ -118,7 +133,7 @@ export class AppComponent {
   }
 
   // parse the inputted file name to see if it is valid
-  parseFileName(filename){
+  parseFileName(filename, toDirectory){
     var errorCode;
     var isValid = true;
     if(filename == undefined || filename == ''){
@@ -134,10 +149,16 @@ export class AppComponent {
       isValid = false;
     }
     else {
-      // check for duplicate file names
-      for(var i=0; i<this.fileNames.length; ++i){
-        if(filename.toLowerCase() == this.fileNames[i].toLowerCase()){
-          return [false, "Filename already exists!"];
+      // check for duplicate file names in directories
+      for(var i=0; i<this.filesArr.length; ++i){
+        console.log(this.filesArr[i].name, this.filesArr[i].storagePath);
+        if(this.filesArr[i].name.toLowerCase() == filename.toLowerCase()){
+          // File has duplicate file name
+          console.log("Checking paths", this.filesArr[i].storagePath, toDirectory);
+          let newAbsPath = toDirectory + '/' + filename;
+          if(this.filesArr[i].storagePath == newAbsPath){
+            return [false, "Filename already exists in this directory"];
+          }
         }
       }
     }
@@ -163,55 +184,81 @@ export class AppComponent {
   }
 
 
+  // Create a file object when the create file form is completed
   fileCreated(form : NgForm) {
     console.log(form.value);
+    var newDirPath = form.value["toDirectory"]
+    if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
+        newDirPath = this.topLevelDir;
+    }
     let newFileName = form.value["fileName"];
-    let returnValue = this.parseFileName(newFileName);
-    let newDirName = form.value["toDirectory"]
-    var newFileRef;
-    if(newDirName == "" || newDirName == null || newDirName == undefined){
-      console.log("No directory specified");
-      newFileRef = this.ref.child('test-files').push();
-    }
-    else {
-      console.log("blah blah blah");
-      newFileRef = this.ref.child('test-files').child(newDirName).push();
-    }
-
+    let returnValue = this.parseFileName(newFileName, newDirPath);
     if(returnValue[0] == false){
        showModalError(returnValue[1], '#newFileModalError');
     }
-    else {
+    else {  
+      let newFileRef = this.ref.child(newDirPath).push();
+
+      let fileAbsPath = newDirPath + '/' + newFileRef.key;
+      let storagePath = newDirPath + '/' + newFileName;
+      let splitPath = newDirPath.split('/');
+      let parentNodeId = splitPath[splitPath.length-1];
+
+      let file = {
+        id: newFileRef.key,
+        isFile: true,
+        name: newFileName,
+        isToggled: false,
+        absPath: fileAbsPath,
+        storagePath: storagePath,
+        parent: parentNodeId,
+        ref: newFileRef
+      }
+
       this.currentFileName = newFileName;
-      this.events.publish('file:created', newFileName, newFileRef);
+      this.events.publish('file:created', file);
       closeModal('#newFileModal');
-    }
+    } 
   }
 
   dirCreated(form : NgForm) {
     let newDirName = form.value["dirName"];
     let returnValue = this.parseDirName(newDirName);
+    let parentDirPath = form.value["parentDirectory"];
+    var newDirPath;
     if(returnValue[0] == false){
        showModalError(returnValue[1], '#newDirModalError');
     }
     else {
-      this.events.publish('directory:created', newDirName);
+      // Either place the new directory nested or in the top-level directory
+      if(parentDirPath == null || parentDirPath == "" || parentDirPath == undefined){
+        newDirPath = this.topLevelDir + '/' + newDirName;
+      }
+      else { // nest the directory
+        newDirPath = parentDirPath + '/' + newDirName;
+      }
+      let newDirRef = this.ref.child(newDirPath);
+      let pushVals = {
+        "isToggled": false
+      }
+      newDirRef.set(pushVals);
+
       closeModal('#newDirModal');
     }
   }
 
   dirDeleted(form : NgForm) {
     console.log(form.value);
-    let dirToDelete = form.value["toDirectory"];
-    if(dirToDelete == ""){
+    let dirToDeletePath = form.value["toDirectory"];
+    if(dirToDeletePath == ""){
       console.log("none to delete");
     }
     else {
-      this.events.publish('directory:deleted', dirToDelete);
+      console.log(dirToDeletePath);
+      this.events.publish('directory:deleted', dirToDeletePath);
       closeModal('#deleteDirModal');
     }
   }
-
 
   collapse(){
     collapseSidebar(this.isCollapsed);
@@ -230,7 +277,7 @@ export class AppComponent {
   }
 
   deleteFile(){
-    this.events.publish('file:deleted');
+    this.events.publish('file:deleted', this.currentFile);
   }
 
   editFileName(){
@@ -251,7 +298,7 @@ export class AppComponent {
           return
         }
 
-        let returnValue = self.parseFileName(newFileName);
+        let returnValue = self.parseFileName(newFileName, self.currentFile.storagePath);
         if(returnValue[0] == false){
           alert(returnValue[1]);
           inputArea.classList.toggle("hidden");
@@ -259,13 +306,19 @@ export class AppComponent {
         }
         else {
           var updateValues = {"filename": inputArea.value};
-          self.ref.child("test-files").child(self.currentFilePath).update(updateValues);
+          self.ref.child(self.currentFile.absPath).update(updateValues);
           self.events.publish('filename:edited', previousFileName, newFileName);
           inputArea.classList.toggle("hidden");
           fileLabel.classList.toggle("hidden");
           self.currentFileName = newFileName;
         }
-       }
+      }
+      else if(event.keyCode == 27){
+        inputArea.classList.toggle("hidden");
+        fileLabel.classList.toggle("hidden");
+      }
+
+
      });
   }
 }

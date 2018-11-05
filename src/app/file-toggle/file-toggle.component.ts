@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { CookieService } from 'ngx-cookie-service';
@@ -22,6 +22,11 @@ export class FileToggleComponent {
 	directories: Array<Object> = [];
 	isNightMode = true;
   ref: firebase.database.Reference;
+  currentPopover: any;
+
+  @Input() parentId:string;
+  @Input() dataList:any [];
+
 	constructor(
 		db: AngularFireDatabase, 
     private _fileService: FileService,
@@ -34,18 +39,45 @@ export class FileToggleComponent {
 	}
 
   ngOnInit(){
-    this.populateFilesArr();
     this.ref = firebase.database().ref();
   }
 
-  populateFilesArr(){
-    this._fileService.getFiles().subscribe(files => 
-      this.newFiles = files
-    );
+  ngAfterViewInit(){
+    console.log("file toggle view init");
+    for(var i=0; i<this.dataList.length; i++){
+      // ex: absPath = test-files/-LQHQtHCL332PHI6zrGy
+      // test-files is top-level dir, so this level will = 0 b/c this file resides in it
+      let fileNestedLevel = this.dataList[i].absPath.split('/').length -2;
+      let filePadding = (15 * fileNestedLevel) + 3;
+      var fileElement = document.getElementById(this.dataList[i].id);
+      if(fileElement != undefined){
+        fileElement.style.paddingLeft = `${filePadding}px`;
+      }
+    }
   }
 
-  toggleDir(dirId){
-    let dirRef = this.ref.child('test-files').child(dirId);
+  // Logic from: https://stackblitz.com/edit/angular-jvaawg?file=src%2Fapp%2Ftree.component.ts
+  removeCurrentLevelItems=(datalist,parentId)=>{
+    //logic here to remove current level items
+    return datalist.filter(item=>item.parentId!=parentId)
+  }
+
+  onRightClick(item, popover) {
+    console.log("right clicked", item);
+    if(this.currentPopover == undefined){
+      popover.open();
+      this.currentPopover = popover
+    }
+    else {
+      this.currentPopover.close();
+      this.currentPopover = popover;
+      popover.open();
+    }
+    return false;
+  }
+
+  toggleDir(dirPath, dirId){
+    let dirRef = this.ref.child(dirPath);
     toggleHelper(dirId, dirRef);
   }
 
@@ -55,8 +87,20 @@ export class FileToggleComponent {
 
 	// send the file to the editor that was just clicked in the filelist
 	fileClicked(file){
-		let filename = file.data["filename"];
-		let filepath = file.path;
-		this.events.publish('file:toggled', filename, filepath);
+		this.events.publish('file:toggled', file);
+    console.log("Clicked on file!", file);
 	}
+
+  setServeFile(file){
+    this.events.publish('file:rendered', file);
+  }
+
+  setDeleteFile(file){
+    this.events.publish('file:deleted', file);
+  }
+
+  setDeleteDirectory(dir){
+    this.events.publish('directory:deleted', dir.absPath);
+  }
+
 }

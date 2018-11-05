@@ -48,6 +48,7 @@
     "@angular/platform-browser": "^6.0.3",
     "@angular/platform-browser-dynamic": "^6.0.3",
     "@angular/router": "^6.0.3",
+    "@ng-bootstrap/ng-bootstrap": "^4.0.0",
     "@types/firebase": "^3.2.1",
     "@types/markdown-it": "0.0.4",
     "codemirror": "^5.39.2",

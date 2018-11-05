@@ -8,6 +8,16 @@
 */
 function closeModal(modalId){
 	$(modalId).modal('hide');
+}
+
+// listener for modal closing / opening, reset the form
+function modalListener(modalId, modalErrorId){
+
+	// Hide the error when it appears
+	$(modalId).on('show.bs.modal', function () {
+		$(modalErrorId).addClass('invisible');
+	});
+
 	// reset the form when it closes
 	$(modalId).on('hidden.bs.modal', function () {
     	$(this).find('form').trigger('reset');
@@ -125,6 +135,7 @@ function toggleClass(isNightMode){
 function toggleHelper(dirId, dirRef){
 	let newId = '#' + dirId;
 	let arrowId = dirId + '-arrow';
+	console.log(document.getElementById(arrowId));
 	$(newId).on('show.bs.collapse', function(){
 		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
 		document.getElementById(arrowId).classList.add("octicon-arrow-down");
