@@ -59,6 +59,7 @@
     "markdown-it": "^8.4.1",
     "markdown-it-emoji": "^1.4.0",
     "material-design-icons": "^3.0.1",
+    "ng-keyboard-shortcuts": "^6.1.1",
     "ng2-codemirror": "^1.1.3",
     "ngx-cookie-service": "^1.0.10",
     "octicons": "^8.1.0",

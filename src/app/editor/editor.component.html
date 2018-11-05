@@ -1,3 +1,4 @@
+<ng-container *ngIf="isNightMode">
 <ul id="editorTabs" class="nav nav-tabs bg-dark text-white">
   <ng-container *ngFor="let file of editingFilesArray">
 	    <a id="{{ file.name + '-tab' }}"class="nav-link bg-dark text-white active" (click)="setTab(file, $event)">{{ file.name }}&nbsp;&nbsp;<button type="button" class="close" aria-label="Close">
@@ -5,4 +6,15 @@
 		</button></a>
   </ng-container>
 </ul>
+</ng-container>
+<ng-container *ngIf="!isNightMode">
+<ul id="editorTabs" class="nav nav-tabs">
+  <ng-container *ngFor="let file of editingFilesArray">
+	    <a id="{{ file.name + '-tab' }}"class="nav-link active" (click)="setTab(file, $event)">{{ file.name }}&nbsp;&nbsp;<button type="button" class="close" aria-label="Close">
+	  	<span aria-hidden="true">&times;</span>
+		</button></a>
+  </ng-container>
+</ul>
+</ng-container>
+
 <codemirror [config]="options" id="codemirrorElement"></codemirror>

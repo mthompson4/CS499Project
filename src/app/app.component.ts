@@ -9,10 +9,12 @@ import { FileService } from './file.service';
 import { CodemirrorComponent } from 'ng2-codemirror';
 import 'firebase/database';
 import { environment } from '../environments/environment';
+import { KeyboardShortcutsService } from 'ng-keyboard-shortcuts';
 
 // #region External JS methods
 declare function showModalError(message, modalId): any;
 declare function closeModal(modalId): any;
+declare function presentModal(modalId): any;
 declare function filenameEditor(): any;
 declare function collapseSidebar(collapse): any;
 declare function toggleClass(isNightMode): any;
@@ -21,7 +23,8 @@ declare function toggleClass(isNightMode): any;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  providers: [ KeyboardShortcutsService ]
 })
 export class AppComponent {
   ref: firebase.database.Reference;
@@ -35,8 +38,41 @@ export class AppComponent {
   constructor(
     public events: Events,
     public cookie: CookieService, 
-    private _fileService: FileService
+    private _fileService: FileService,
+    private keyboard: KeyboardShortcutsService
   ) {
+
+    // Setup keyboard shortcuts
+    this.keyboard.add([
+      {
+        // Create New File
+        key: ['cmd + e'],
+        command: () => presentModal('#newFileModal'),
+        preventDefault: true
+      },
+      { // Create New Directory
+        key: ['cmd + d'],
+        command: () => presentModal('#newDirModal'),
+        preventDefault: true
+      },
+      { // Serve the file
+        key: ['cmd + j'],
+        command: () => this.renderFile(),
+        preventDefault: true
+      },
+      { // Delete the current file
+        key: ['cmd + k'],
+        command: () => this.deleteFile(),
+        preventDefault: true
+      },
+      { // Delete a directory
+        key: ['cmd + b'],
+        command: () => presentModal('#deleteDirModal'),
+        preventDefault: true
+      },
+
+    ]);
+
     events.subscribe('file:toggled', (filename, filepath) => {
       this.currentFileName = filename;
       this.currentFilePath = filepath;
@@ -80,7 +116,6 @@ export class AppComponent {
       this.dirNames = names
     );
   }
-
 
   // parse the inputted file name to see if it is valid
   parseFileName(filename){
