@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Events } from 'ionic-angular';
 import { CookieService } from 'ngx-cookie-service';
@@ -36,12 +36,6 @@ export class FileToggleComponent {
   ngOnInit(){
     this.populateFilesArr();
     this.ref = firebase.database().ref();
-  }
-
-  ngAfterViewInit(){
-    /*if(this.cookie.get("developer-mode") == "day") {
-      this.isNightMode = false;
-    }*/
   }
 
   populateFilesArr(){
