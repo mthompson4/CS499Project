@@ -1,7 +1,8 @@
-import { Component} from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Events } from 'ionic-angular';
+import { CookieService } from 'ngx-cookie-service';
 import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
 import { FileService } from './file.service';
@@ -36,6 +37,7 @@ export class AppComponent {
   dirNames: Array<String> = [];
   constructor(
     public events: Events,
+    public cookie: CookieService, 
     private _fileService: FileService,
     private keyboard: KeyboardShortcutsService
   ) {
@@ -86,6 +88,13 @@ export class AppComponent {
     this.editFileName();
     this.populateFileNamesArr();
     this.populateDirNamesArr();
+  }
+
+  ngAfterViewInit(){
+    if(this.cookie.get("developer-mode") == "day"){
+      this.isNightMode = true;
+      this.setColorMode();
+    }
   }
 
   saveClicked(){
@@ -213,6 +222,11 @@ export class AppComponent {
     this.events.publish('color:switched', this.isNightMode);
     toggleClass(this.isNightMode);
     this.isNightMode = !(this.isNightMode);
+    if(this.isNightMode) {
+      this.cookie.set("developer-mode", "night");
+    } else {
+      this.cookie.set("developer-mode", "day");
+    }
   }
 
   deleteFile(){

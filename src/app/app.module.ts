@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { CodemirrorModule } from 'ng2-codemirror';
 import { FormsModule } from '@angular/forms';
 import { Events } from 'ionic-angular';
+import { CookieService } from 'ngx-cookie-service';
 import { EditorComponent } from './editor/editor.component';
 import { KeyboardShortcutsModule } from 'ng-keyboard-shortcuts';
 import * as firebase from 'firebase';
@@ -29,7 +30,7 @@ firebase.initializeApp(environment.firebaseConfig);
     FormsModule,
     KeyboardShortcutsModule
   ],
-  providers: [Events],
+  providers: [Events, CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
