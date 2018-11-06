@@ -115,10 +115,14 @@ function toggleClass(isNightMode){
 	var file_toggler = document.body.getElementsByClassName('file-toggler');
 	let nav_tabs = document.body.getElementsByClassName('nav-tabs');
 	let nav_links = document.getElementById('editorTabs').getElementsByClassName('nav-link');
+	let nav_items = document.getElementById('editorTabs').getElementsByClassName('nav-link');
 	let userList = document.getElementById("userlist");
+	let foo = document.body.getElementsByClassName('row');
+	let bar = document.body.getElementsByClassName('testy');
+	let yes = document.body.getElementsByClassName('shortcut');
 
 	var elements_to_change = [...dropdown_items, ...dropdown_menus, ...file_toggler, ...new_file_modal_items, 
-	...new_dir_modal_items, ...delete_dir_modal_items, ...nav_tabs, ...nav_links];
+	...new_dir_modal_items, ...delete_dir_modal_items, ...nav_tabs, ...nav_links, ...foo, ...bar, ...yes];
 	// Loop through all of the elements and toggle their classes
 	for(var i = 0; i < elements_to_change.length; ++i){
 		elements_to_change[i].classList.toggle("bg-dark");

@@ -11,6 +11,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+import { CookieService } from 'ngx-cookie-service';
 
 
 describe('AppComponent', () => {
@@ -20,7 +21,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [FormsModule, AngularFireModule.initializeApp(environment.firebaseConfig), NgbModule],
       declarations: [ AppComponent, CodemirrorComponent, EditorComponent, FileToggleComponent],
-      providers: [Events, AngularFireDatabase]
+      providers: [Events, AngularFireDatabase, CookieService]
     })
     .compileComponents();
   }));

@@ -7,6 +7,7 @@ import { Events } from 'ionic-angular';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environment';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { CookieService } from 'ngx-cookie-service';
 
 describe('FileToggleComponent', () => {
   let component: FileToggleComponent;
@@ -16,7 +17,7 @@ describe('FileToggleComponent', () => {
     TestBed.configureTestingModule({
       imports: [FormsModule, AngularFireModule.initializeApp(environment.firebaseConfig), NgbModule],
       declarations: [ FileToggleComponent ],
-      providers: [Events, AngularFireDatabase]
+      providers: [Events, AngularFireDatabase, CookieService]
     })
     .compileComponents();
   }));

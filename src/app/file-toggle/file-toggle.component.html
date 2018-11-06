@@ -1,3 +1,6 @@
+<ng-container *ngIf="isNightMode; then nightMode; else dayMode"></ng-container>
+
+<ng-template #nightMode>
 <div class="file-list-test" *ngFor="let item of dataList">
 	<ng-container *ngIf="item.parent==parentId">
 	    <ng-container *ngIf="item.isFile; then fileItem; else dirItem"></ng-container>
@@ -80,8 +83,92 @@
 
 	</ng-template>
 
+</div>
+</ng-template>
+
+<ng-template #dayMode>
+<div class="file-list-test" *ngFor="let item of dataList">
+	<ng-container *ngIf="item.parent==parentId">
+	    <ng-container *ngIf="item.isFile; then fileItem; else dirItem"></ng-container>
+	    <ng-template #fileItem>
+	    <li 
+		    id="{{ item.id }}"
+		    class="list-group-item list-group-item-action border-0 file-item" 
+		    [ngbPopover]="filePopContent"
+		    triggers="manual"
+		    #p1="ngbPopover"
+		    placement="top"
+		   	(contextmenu)="onRightClick(item, p1, $event)" 
+		    (click)="fileClicked(item)"
+		>
+	    	<span class="octicon octicon-file-code"></span>
+	    	<span> {{item.name}} </span>
+	    	<file-toggle [parentId]="item.id" [dataList]="removeCurrentLevelItems(dataList,parentId)"></file-toggle>
+	    </li>
+
+		</ng-template>
+
+		<ng-template #dirItem>
+			<ng-container *ngIf="item.isToggled; then dirExpanded; else dirCollapsed"></ng-container>
+			<ng-template #dirExpanded>
+			    <li 
+			    	id="{{ item.id }}" 
+			    	class="list-group-item list-group-item-action border-0" 
+			    	(click)="toggleDir(item.absPath, item.id)"
+			    	[ngbPopover]="dirPopContent"
+			    	triggers="manual"
+			    	#p2="ngbPopover"
+		    		placement="top"
+		   			(contextmenu)="onRightClick(item, p2, $event)"
+			    >
+					<span id="{{ item.id + '-arrow' }}" class="octicon octicon-arrow-down"> </span>
+					<span class="octicon octicon-file-directory"> </span>
+					<span> {{ item.name }}</span>
+				</li>
+				<div id="{{ item.id }}" class="collapse show">
+					<file-toggle [parentId]="item.id" [dataList]="removeCurrentLevelItems(dataList,parentId)"></file-toggle>
+				</div>
+			</ng-template>
+			<ng-template #dirCollapsed>
+			    <li 
+			    	id="{{ item.id }}" 
+			    	class="list-group-item list-group-item-action border-0" 
+			    	(click)="toggleDir(item.absPath, item.id)"
+			    	[ngbPopover]="dirPopContent"
+			    	triggers="manual"
+			    	#p2="ngbPopover"
+		    		placement="top"
+		   			(contextmenu)="onRightClick(item, p2, $event)" 
+			    >
+					<span id="{{ item.id + '-arrow' }}" class="octicon octicon-arrow-right"> </span>
+					<span class="octicon octicon-file-directory"> </span>
+					<span> {{ item.name }}</span>
+				</li>
+				<div id="{{ item.id }}" class="collapse">
+					<file-toggle [parentId]="item.id" [dataList]="removeCurrentLevelItems(dataList,parentId)"></file-toggle>
+				</div>
+			</ng-template>
+		</ng-template>
+	</ng-container>
+
+	<!-- Popover templating -->
+
+	<!-- File Popover Template -->
+	<ng-template #filePopContent>
+	<div class="nav-item dropdown">
+		<a class="dropdown-item" (click)="setServeFile(item)">Serve File</a>
+		<a class="dropdown-item" (click)="setDeleteFile(item)">Delete File</a>
+	</div>
+	</ng-template>
+
+	<!-- Directory Popover Template -->
+	<ng-template #dirPopContent>
+	<div class="nav-item dropdown">
+		<a class="dropdown-item" (click)="setDeleteDirectory(item)">Delete Folder</a>
+	</div>
+
+	</ng-template>
 
 </div>
-
-
+</ng-template>
 

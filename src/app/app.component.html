@@ -13,7 +13,7 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <ul class="navbar-nav">
           <!-- File dropdown -->
-          <li class="nav-item dropdown bg-dark text-white">
+          <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   File
               </a>
@@ -22,50 +22,50 @@
                   
                   <!-- Add a new File -->
                   <div class="row bg-dark text-white">
-                    <div class="col-sm-6 bg-dark text-white">
+                    <div class="col-md-6 testy bg-dark text-white">
                       <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#newFileModal"><img src="/assets/open-iconic/svg/plus.svg" width="14" height="14"> New File</a>
                     </div>
-                    <div class="col-sm-4 bg-dark text-white">
+                    <div class="col-sm-4 testy bg-dark text-white">
                       <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="12" height="12"> + E</span>
                     </div>     
                   </div>
 
                   <!-- Add a new folder -->
                   <div class="row bg-dark text-white">
-                    <div class="col-md-6 bg-dark text-white">
+                    <div class="col-md-6 testy bg-dark text-white">
                       <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#newDirModal"><img src="/assets/open-iconic/svg/folder.svg" width="14" height="14"> New Folder</a>
                     </div>
-                    <div class="col-sm-4 bg-dark text-white">
+                    <div class="col-sm-4 testy bg-dark text-white">
                       <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="12" height="12"> + D</span>
                     </div>     
                   </div>
 
                 <!-- Serve the current file -->
                 <div class="row bg-dark text-white">
-                    <div class="col-sm-6 bg-dark text-white">
+                    <div class="col-md-6 testy bg-dark text-white">
                       <a (click)="renderFile()" class="dropdown-item vcenter bg-dark text-white"><img src="/assets/open-iconic/svg/eye.svg" width="14" height="14"> Serve File</a>
                     </div>
-                    <div class="col-sm-4 bg-dark text-white">
+                    <div class="col-sm-4 testy bg-dark text-white">
                       <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="12" height="12"> + J</span>
                     </div>     
                 </div>
               
               <!-- Delete the current file -->
               <div class="row bg-dark text-white">
-                    <div class="col-sm-6 bg-dark text-white">
+                    <div class="col-md-6 testy bg-dark text-white">
                       <a (click)="deleteFile()" class="dropdown-item vcenter bg-dark text-white"><img src="/assets/open-iconic/svg/delete.svg" width="14" height="14"> Delete File</a>
                     </div>
-                    <div class="col-sm-4 bg-dark text-white">
+                    <div class="col-sm-4 testy bg-dark text-white">
                       <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="12" height="12"> + K</span>
                     </div>     
               </div>
             
               <!-- Delete a folder -->
               <div class="row bg-dark text-white">
-                <div class="col-md-6 bg-dark text-white">
+                <div class="col-md-6 testy bg-dark text-white">
                   <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#deleteDirModal"><img src="/assets/open-iconic/svg/folder.svg" width="14" height="14"> Delete Folder</a>
                 </div>
-                <div class="col-sm-4 bg-dark text-white">
+                <div class="col-sm-4 testy bg-dark text-white">
                   <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="12" height="12"> + B</span>
                 </div>     
               </div>
@@ -73,6 +73,7 @@
             </div>
           </div>
           </li>
+
 
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="dropdown10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Edit</a>

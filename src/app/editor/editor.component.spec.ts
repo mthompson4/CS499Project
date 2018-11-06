@@ -4,6 +4,7 @@ import { CodemirrorComponent } from 'ng2-codemirror';
 import { Events } from 'ionic-angular';
 import { environment } from '../../environments/environment';
 import * as firebase from 'firebase';
+import { CookieService } from 'ngx-cookie-service';
 
 describe('EditorComponent', () => {
   let component: EditorComponent;
@@ -12,7 +13,7 @@ describe('EditorComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ EditorComponent, CodemirrorComponent ],
-      providers: [Events]
+      providers: [Events, CookieService]
     })
     .compileComponents();
   }));

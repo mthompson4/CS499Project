@@ -34,12 +34,20 @@ export class FileToggleComponent {
     public cookie: CookieService
 	) {
     	events.subscribe('color:switched', (toMode) => {
-      		this.isNightMode = !(this.isNightMode);
+          console.log("COLOR SWITCHED BLAH BLAH BLAH", toMode);
+      		this.isNightMode = !toMode;
     	});
 	}
 
   ngOnInit(){
     this.ref = firebase.database().ref();
+    if(this.cookie.get("developer-mode") == "day"){
+      console.log("cookie is day mode")
+      this.isNightMode = false;
+    }
+    else {
+      console.log("cookie is night mode");
+    }
   }
 
   ngAfterViewInit(){
