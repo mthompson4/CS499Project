@@ -26,6 +26,12 @@ import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/matchtags.js';
 import 'codemirror/keymap/sublime.js';
+import 'codemirror/addon/dialog/dialog.js';
+import 'codemirror/addon/search/search.js';
+import 'codemirror/addon/search/searchcursor.js';
+import 'codemirror/addon/scroll/annotatescrollbar.js';
+import 'codemirror/addon/search/matchesonscrollbar.js';
+import 'codemirror/addon/search/jump-to-line.js';
 
 // external JS functions
 declare var FirepadUserList: any;
@@ -47,6 +53,7 @@ export class EditorComponent {
     mode: {
       name: 'xml',
     },
+    extraKeys: {"Alt-F": "findPersistent"},
     tabSize: 2,
     autofocus: true,
     theme: 'monokai',

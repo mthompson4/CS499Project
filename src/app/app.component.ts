@@ -101,6 +101,7 @@ export class AppComponent {
 
   populateFilesArr(){
     this._fileService.getFiles().subscribe(files => {
+      console.log("getting files");
       this.filesArr = files;
     });
   }
@@ -136,7 +137,7 @@ export class AppComponent {
   parseFileName(filename, toDirectory){
     var errorCode;
     var isValid = true;
-    if(filename == undefined || filename == ''){
+    if(filename == undefined || filename == '' || filename == null){
       errorCode = "Filename cannot be empty";
       isValid = false;
     }

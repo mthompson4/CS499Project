@@ -38,7 +38,6 @@ export class FileService {
 			this.ref.on("value", snapshot => {
 				var tempArr = [];
 				self.getFilesInDirFromSnap(snapshot, 'test-files', tempArr);
-				console.log("DONE", tempArr);
 				tempArr.sort(this.compare);
 				observer.next(tempArr);
 			})
@@ -47,7 +46,7 @@ export class FileService {
 
 	getFilesInDirFromSnap(datasnapshot, dirPath, fileArray){
 		var self = this;
-		this.ref.child(dirPath).on("value", snapshot => {
+		this.ref.child(dirPath).once("value", snapshot => {
 			snapshot.forEach(function(data) {
 				const key = data.key
 				let splitPath = dirPath.split('/');
