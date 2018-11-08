@@ -34,19 +34,9 @@ describe('AppComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it(`Should parse file name correctly'`, () => {
-    var parseResults;
-    parseResults = component.parseFileName("test.txt", "test-files");
-    expect(parseResults[0]).toBe(true);
-
-    parseResults = component.parseFileName("test", "test-files");
-    expect(parseResults[0]).toBe(false);
-
-  });
 
   it(`should work this file`, () => {
-    var parseResults;
-    parseResults = component.parseFileName("thisFile.py", "test-files");
+    var parseResults = component.parseFileName("thisFile.py", "test-files");
     expect(parseResults[0]).toBe(true);
   })
 
@@ -68,13 +58,11 @@ describe('AppComponent', () => {
   it('Parses file names with spaces as invalid', () => {
     var parseResult3 = component.parseFileName("this has a space.txt", "test-files");
     expect(parseResult3[0]).toBe(false);
+
   })
 
   it('Parses file names with an extension but no name as false', () => {
     var parseResult4 = component.parseFileName(".js", "test-files");
     expect(parseResult4[0]).toBe(false);
-    var parseResult0 = component.parseFileName(".txt", "test-files");
-
-    expect(parseResult0[0]).toBe(false);
   })
 });

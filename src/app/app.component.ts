@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { Events } from 'ionic-angular';
@@ -38,6 +38,8 @@ export class AppComponent {
   fileNames: Array<String> = [];
   dirNames: Array<String> = [];
   public filesArr: Array<any> = [];
+
+  @ViewChild('username-input') input;
 
   constructor(
     public events: Events,
@@ -213,7 +215,8 @@ export class AppComponent {
         absPath: fileAbsPath,
         storagePath: storagePath,
         parent: parentNodeId,
-        ref: newFileRef
+        databaseRef: newFileRef,
+        firepadRef: this.ref.child('firepad').child(newFileRef.key)
       }
 
       this.currentFileName = newFileName;

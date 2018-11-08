@@ -139,7 +139,8 @@ function toggleClass(isNightMode){
 function toggleHelper(dirId, dirRef){
 	let newId = '#' + dirId;
 	let arrowId = dirId + '-arrow';
-	console.log(document.getElementById(arrowId));
+	console.log(document.getElementById(arrowId).classList.contains('octicon-arrow-down'));
+
 	$(newId).on('show.bs.collapse', function(){
 		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
 		document.getElementById(arrowId).classList.add("octicon-arrow-down");
@@ -147,19 +148,23 @@ function toggleHelper(dirId, dirRef){
 		document.getElementById(arrowId).classList.add("octicon-arrow-right");
 		document.getElementById(arrowId).classList.remove("octicon-arrow-down");
 	});
-	if ($(newId).hasClass('collapse') && $(newId).hasClass('show')) {
+
+	if (document.getElementById(arrowId).classList.contains('octicon-arrow-down')) {
+		console.log('has down arrow');
 		$(newId).collapse('hide');
 		var postData = {
      		"isToggled": false
     	};
     	dirRef.update(postData);
-
+    	console.log("HIDING HIDING HIDING");
 	}
 	else {
+		console.log('has right arrow');
 		$(newId).collapse('show');
 		var postData = {
      		"isToggled": true
     	};
     	dirRef.update(postData);
+    	console.log("SHOWING SHOWING SHOWING");
 	}
 }

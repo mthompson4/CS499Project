@@ -35,9 +35,11 @@ export class FileService {
 	getFiles(){
 		var self = this;
 		return new Observable<any>(observer => {
-			this.ref.on("value", snapshot => {
+			this.ref.child('test-files').on("value", snapshot => {
+				console.log("SNAPSHOT", snapshot.val());
 				var tempArr = [];
 				self.getFilesInDirFromSnap(snapshot, 'test-files', tempArr);
+				console.log("GOT FILES", tempArr);
 				tempArr.sort(this.compare);
 				observer.next(tempArr);
 			})
@@ -69,7 +71,8 @@ export class FileService {
 							absPath: newDirPath,
 							storagePath: newDirPath,
 							parent: parentNodeId,
-							ref: self.ref.child(newDirPath)
+							databaseRef: self.ref.child(newDirPath),
+							firepadRef: self.ref.child('firepad').child(key)
 						}
 						fileArray.push(dirObj)
 						self.getFilesInDirFromSnap(data, newDirPath, fileArray);
@@ -86,7 +89,8 @@ export class FileService {
 							absPath: fileAbsPath,
 							storagePath: storagePath,
 							parent: parentNodeId,
-							ref: self.ref.child(fileAbsPath)
+							databaseRef: self.ref.child(fileAbsPath),
+							firepadRef: self.ref.child('firepad').child(key)
 						}
 						fileArray.push(file);
 					}

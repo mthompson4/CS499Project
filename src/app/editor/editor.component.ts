@@ -69,6 +69,8 @@ export class EditorComponent {
   ref: firebase.database.Reference; // firebase database reference
   // currentFileRef: firebase.database.Reference; // reference to the current file in the database
   userId; // userid of the current user
+  userColor; // color of current user
+  userDisplayName;
   isSaving: boolean; // boolean that keeps track of whether or not the editor is currently saving
   isNightMode = true;
   topLevelDirectory = 'test-files';
@@ -134,8 +136,20 @@ export class EditorComponent {
     this.cm = codemirrorInstance;
     this.ref = firebase.database().ref();
     this.userId = Math.floor(Math.random() * 9999).toString();
+    // color code referenced from 
+    // https://stackoverflow.com/questions/5092808/how-do-i-randomly-generate-html-hex-color-codes-using-javascript
+    this.userColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
     this.loadRandFile();
     this.events.publish('file:updateListener', this.cm);
+
+    let usernameCookie = this.cookie.get("user-displayName");
+    if(usernameCookie != undefined){
+      this.userDisplayName = usernameCookie;
+    }
+    this.ref.child('users').child(this.userId).child('name').on("value", snapshot => {
+      this.userDisplayName = snapshot.val();
+      this.cookie.set("user-displayName", snapshot.val());
+    });
   }
 
   loadRandFile(){
@@ -166,8 +180,10 @@ export class EditorComponent {
   */
   setFileInFirepad(file){
     document.getElementById('userlist').innerHTML = '';
-    this.firepad = Firepad.fromCodeMirror(file.ref, this.cm, { userId: this.userId});
-    var userlist = FirepadUserList.fromDiv(file.ref.child('users'), document.getElementById('userlist'), this.userId);
+    this.firepad = Firepad.fromCodeMirror(file.firepadRef, this.cm, { userId: this.userId, userColor: this.userColor});
+    var userlist = FirepadUserList.fromDiv(this.ref.child('users'), document.getElementById('userlist'), this.userId, this.userDisplayName, this.userColor, file.name);
+    this.hasCreatedUserlist = true;
+    
     this.updateTimestamp();
   }
 
@@ -291,7 +307,7 @@ export class EditorComponent {
     }
 
     if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
-      this.currentFile.ref.child('users').child(this.userId).remove();
+      this.currentFile.firepadRef.child('users').child(this.userId).remove();
       this.firepad.dispose();
     }
 
@@ -348,32 +364,16 @@ export class EditorComponent {
     this.cm.setOption("theme", newTheme);
   }
 
-  // /**
-  //  * Creates a file and stores it in the firebase database and storage bucket
-  //  * @param {file}: Object - the name of the file to create
-  // */
-  // createFile(file){
-  //   let fileRef = this.ref.child(filePath).push();
-  //   var postData = {
-  //     "filename": filename
-  //   };
-  //   fileRef.set(postData);
-  //   let storagePath = filePath + '/' + filename;
-  //   console.log("STORAGE PATH", storagePath);
-  //   this.setCurrentFileAttributes(filename, filePath, storagePath);
-  //   this.saveToCloud(filename);
-  //   this.changeFile(filename, filePath, storagePath);
-  // }
-
   /**
    * Code that executes when a file gets created by the user
    * @param {file}: Object - The file object 
   */
   fileCreated(file){
+    console.log(file);
     var postData = {
       "filename": file.name
     };
-    file.ref.set(postData);
+    file.databaseRef.set(postData);
     this.setCurrentFile(file);
     this.saveToCloud(file);
     this.changeFile(file);
@@ -425,7 +425,8 @@ export class EditorComponent {
 
   // Delete the current file and switch to a new one
   deleteFile(file){
-    file.ref.remove();
+    file.databaseRef.remove();
+    file.firepadRef.remove();
     this.deleteFromStorage(file);
     // find the index within currently editing files
     let indexOfFile = this.findNameInEditingFiles(this.currentFile.name);
