@@ -16,6 +16,8 @@ import { KeyboardShortcutsModule } from 'ng-keyboard-shortcuts';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import * as firebase from 'firebase';
 
+
+// Declare app wide module imports
 firebase.initializeApp(environment.firebaseConfig);
 @NgModule({
   declarations: [

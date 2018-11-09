@@ -27,16 +27,15 @@ declare function toggleClass(isNightMode): any;
   styleUrls: ['./app.component.css'],
   providers: [ KeyboardShortcutsService ]
 })
+
 export class AppComponent {
-  ref: firebase.database.Reference;
-  currentFileName = '';
-  currentFile: any;
-  topLevelDir = 'test-files';
-  title = 'test';
-  isCollapsed = false;
-  isNightMode = true;
-  fileNames: Array<String> = [];
-  dirNames: Array<String> = [];
+
+  ref: firebase.database.Reference; // ref to firebase database
+  currentFileName = ''; // name of current file
+  currentFile: any; // Object of current file 
+  topLevelDir = 'test-files'; // top-level directory where everything is stored
+  isCollapsed = false; // if the sidebar is collapsed or not
+  isNightMode = true; // if it is night mode or not
   public filesArr: Array<any> = [];
 
   @ViewChild('username-input') input;
@@ -95,12 +94,19 @@ export class AppComponent {
   ngOnInit(){
     this.ref = firebase.database().ref();
     this.editFileName();
-    this.populateFileNamesArr();
-    this.populateDirNamesArr();
     this.populateFilesArr();
     modalListener('#newFileModal', '#newFileModalError');
   }
 
+  ngAfterViewInit(){
+    // grab the day/night mode cookie
+    if(this.cookie.get("developer-mode") == "day"){
+      this.isNightMode = true;
+      this.setColorMode();
+    }
+  }
+
+  // populate the array of files
   populateFilesArr(){
     this._fileService.getFiles().subscribe(files => {
       console.log("getting files");
@@ -108,37 +114,22 @@ export class AppComponent {
     });
   }
 
-  ngAfterViewInit(){
-    if(this.cookie.get("developer-mode") == "day"){
-      this.isNightMode = true;
-      this.setColorMode();
-    }
-  }
-
-  saveClicked(){
-    this.events.publish('file:saved');
-  }
-
+  // set an event for serving/rendering the file
   renderFile(){
     this.events.publish('file:rendered', this.currentFile);
   }
 
-  populateFileNamesArr(){
-    this._fileService.getAllFileNames().subscribe(names => 
-      this.fileNames = names
-    );
-  }
-
-  populateDirNamesArr(){
-    this._fileService.getAllDirNames().subscribe(names => 
-      this.dirNames = names
-    );
-  }
-
-  // parse the inputted file name to see if it is valid
+  /** 
+   * parse the inputted file name to see if it is valid
+   * @param {filename}: String - the filename to parse
+   * @param {directory}: String - the path of the file's residing directory
+  */
   parseFileName(filename, toDirectory){
     var errorCode;
     var isValid = true;
+
+    // Don't allow files with spaces or without file extensions
+
     if(filename == undefined || filename == '' || filename == null){
       errorCode = "Filename cannot be empty";
       isValid = false;
@@ -168,7 +159,11 @@ export class AppComponent {
     return [isValid, errorCode];
   }
 
-  // parse the inputted directory name to see if is valid
+  /** 
+   * parse the inputted directory name to see if is valid
+   * @param {filename}: String - the filename to parse
+   * @param {directory}: String - the path of the file's residing directory
+  */
   parseDirName(dirname){
     var errorCode;
     var isValid = true;
@@ -186,10 +181,11 @@ export class AppComponent {
     return [isValid, errorCode];
   }
 
-
-  // Create a file object when the create file form is completed
+  /** 
+   * Create a file object when the create file form is completed
+   * @param {form}: NgForm - the returned form data
+  */
   fileCreated(form : NgForm) {
-    console.log(form.value);
     var newDirPath = form.value["toDirectory"]
     if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
         newDirPath = this.topLevelDir;
@@ -201,12 +197,12 @@ export class AppComponent {
     }
     else {  
       let newFileRef = this.ref.child(newDirPath).push();
-
       let fileAbsPath = newDirPath + '/' + newFileRef.key;
       let storagePath = newDirPath + '/' + newFileName;
       let splitPath = newDirPath.split('/');
       let parentNodeId = splitPath[splitPath.length-1];
 
+      // Create a file object with various metatdata
       let file = {
         id: newFileRef.key,
         isFile: true,
@@ -225,6 +221,11 @@ export class AppComponent {
     } 
   }
 
+
+  /** 
+   * Create a directory object when the create directory form is completed
+   * @param {form}: NgForm - the returned form data
+  */
   dirCreated(form : NgForm) {
     let newDirName = form.value["dirName"];
     let returnValue = this.parseDirName(newDirName);
@@ -251,8 +252,12 @@ export class AppComponent {
     }
   }
 
+
+  /** 
+   * Handle the event when a directory is deleted
+   * @param {form}: NgForm - the returned form data
+  */
   dirDeleted(form : NgForm) {
-    console.log(form.value);
     let dirToDeletePath = form.value["toDirectory"];
     if(dirToDeletePath == ""){
       console.log("none to delete");
@@ -264,11 +269,13 @@ export class AppComponent {
     }
   }
 
+  // Collapse the side bar
   collapse(){
     collapseSidebar(this.isCollapsed);
     this.isCollapsed = !this.isCollapsed;
   }
 
+  // Set the color mode app-wide
   setColorMode(){
     this.events.publish('color:switched', this.isNightMode);
     toggleClass(this.isNightMode);
@@ -280,10 +287,12 @@ export class AppComponent {
     }
   }
 
+  // publish an event to delete the current file
   deleteFile(){
     this.events.publish('file:deleted', this.currentFile);
   }
 
+  // Set a listener for the user to edit the current file name
   editFileName(){
     var fileLabel = document.getElementById("fileNameLabel");
     var inputArea = document.getElementById("editInput") as HTMLInputElement;
@@ -293,7 +302,8 @@ export class AppComponent {
       inputArea.classList.toggle("hidden");
     });
     inputArea.addEventListener("keyup", function(event) {
-      if (event.key === "Enter") {
+
+      if (event.key === "Enter") { // save the file name on pressing Enter
         let previousFileName = self.currentFileName;
         let newFileName = inputArea.value
         if(previousFileName.toLowerCase() == newFileName.toLowerCase()){
@@ -317,12 +327,10 @@ export class AppComponent {
           self.currentFileName = newFileName;
         }
       }
-      else if(event.keyCode == 27){
+      else if(event.keyCode == 27){ // Esc button hit, dismiss input field
         inputArea.classList.toggle("hidden");
         fileLabel.classList.toggle("hidden");
       }
-
-
      });
   }
 }

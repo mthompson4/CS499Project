@@ -92,6 +92,7 @@ function toggleClass(isNightMode){
 	var new_file_modal_items, new_dir_modal_items, delete_dir_modal_items;
 	
 	// Grab the DOM elements for the modal views whether or not it's day or night mode
+	// Toggle the dark/light classes depending on which mode to switch to
 	if(isNightMode) { // switch to day mode
 		colorModeLink.innerHTML = " Enable Night Mode";
 		new_file_modal_items = document.getElementById('newFileModal').getElementsByClassName('bg-dark');
@@ -99,7 +100,7 @@ function toggleClass(isNightMode){
 		delete_dir_modal_items = document.getElementById('deleteDirModal').getElementsByClassName('bg-dark');
 		document.getElementById("modePic").src = "/assets/open-iconic/svg/moon.svg";
 	}
-	else {
+	else { // switch to night mode
 		colorModeLink.innerHTML = " Enable Day Mode";
 		new_file_modal_items = document.getElementById('newFileModal').getElementsByClassName('bg-light');
 		new_dir_modal_items = document.getElementById('newDirModal').getElementsByClassName('bg-light');
@@ -117,12 +118,12 @@ function toggleClass(isNightMode){
 	let nav_links = document.getElementById('editorTabs').getElementsByClassName('nav-link');
 	let nav_items = document.getElementById('editorTabs').getElementsByClassName('nav-link');
 	let userList = document.getElementById("userlist");
-	let foo = document.body.getElementsByClassName('row');
+	let rows = document.body.getElementsByClassName('row');
 	let bar = document.body.getElementsByClassName('testy');
 	let yes = document.body.getElementsByClassName('shortcut');
 
 	var elements_to_change = [...dropdown_items, ...dropdown_menus, ...file_toggler, ...new_file_modal_items, 
-	...new_dir_modal_items, ...delete_dir_modal_items, ...nav_tabs, ...nav_links, ...foo, ...bar, ...yes];
+	...new_dir_modal_items, ...delete_dir_modal_items, ...nav_tabs, ...nav_links, ...rows, ...bar, ...yes];
 	// Loop through all of the elements and toggle their classes
 	for(var i = 0; i < elements_to_change.length; ++i){
 		elements_to_change[i].classList.toggle("bg-dark");
@@ -139,8 +140,8 @@ function toggleClass(isNightMode){
 function toggleHelper(dirId, dirRef){
 	let newId = '#' + dirId;
 	let arrowId = dirId + '-arrow';
-	console.log(document.getElementById(arrowId).classList.contains('octicon-arrow-down'));
 
+	// set listeners for if the directory is closed or opened
 	$(newId).on('show.bs.collapse', function(){
 		document.getElementById(arrowId).classList.remove("octicon-arrow-right");
 		document.getElementById(arrowId).classList.add("octicon-arrow-down");
@@ -150,21 +151,18 @@ function toggleHelper(dirId, dirRef){
 	});
 
 	if (document.getElementById(arrowId).classList.contains('octicon-arrow-down')) {
-		console.log('has down arrow');
+		// Directory is currently expanded
 		$(newId).collapse('hide');
 		var postData = {
      		"isToggled": false
     	};
     	dirRef.update(postData);
-    	console.log("HIDING HIDING HIDING");
 	}
-	else {
-		console.log('has right arrow');
+	else { // Directory is currently hidden
 		$(newId).collapse('show');
 		var postData = {
      		"isToggled": true
     	};
     	dirRef.update(postData);
-    	console.log("SHOWING SHOWING SHOWING");
 	}
 }

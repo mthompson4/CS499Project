@@ -1,4 +1,7 @@
+// Imported Firepad Userlist Code From the Firepad Library
+
 var FirepadUserList = (function() {
+  // Added user color and the currently editing file
   function FirepadUserList(ref, place, userId, displayName, userColor, currentFile) {
     if (!(this instanceof FirepadUserList)) {
       return new FirepadUserList(ref, place, userId, displayName, userColor, currentFile);

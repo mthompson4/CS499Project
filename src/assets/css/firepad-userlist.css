@@ -1,8 +1,9 @@
+/* CSS for the firepad userlist*/
+
 .firepad-userlist {
   /* default height */
   height: 400px;
   min-width: 175px;
-  /*background: #000;*/
 }
 
 .firepad-userlist {

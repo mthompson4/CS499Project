@@ -32,20 +32,26 @@ export class FileService {
 		return 0;
 	}
 
+	// gets all the files/directories in the database as they update
 	getFiles(){
 		var self = this;
 		return new Observable<any>(observer => {
 			this.ref.child('test-files').on("value", snapshot => {
-				console.log("SNAPSHOT", snapshot.val());
 				var tempArr = [];
 				self.getFilesInDirFromSnap(snapshot, 'test-files', tempArr);
-				console.log("GOT FILES", tempArr);
 				tempArr.sort(this.compare);
 				observer.next(tempArr);
 			})
 		})
 	}
 
+
+	/** 
+   	 * get all the files in a particular directory & search nested dirs if needed
+   	 * @param {datasnapshot}: Object - the firebase snapshot data
+   	 * @param {dirPath}: String - the absolute path of the directory
+   	 * @param {fileArray}: Array<Object> - the directory to add the files to
+  	*/
 	getFilesInDirFromSnap(datasnapshot, dirPath, fileArray){
 		var self = this;
 		this.ref.child(dirPath).once("value", snapshot => {
@@ -53,7 +59,7 @@ export class FileService {
 				const key = data.key
 				let splitPath = dirPath.split('/');
 				let parentNodeId = splitPath[splitPath.length-1];
-				if(key != "isToggled"){
+				if(key != "isToggled"){ // ignore toggling values
 					const snapVal = data.val();
 					var isToggled = false;
 					if(snapVal["filename"] == undefined){ // it's a directory entry
@@ -96,52 +102,6 @@ export class FileService {
 					}
 				}
 			});
-		})
-	}
-
-
-	// returns an array of just the file names in the database
-	getAllFileNames(){
-		return new Observable<any>(observer => {
-			this.ref.on("value", snapshot => {
-				var tempArr = [];
-				snapshot.forEach(function(data) {
-					const snapVal = data.val();
-					var filename;
-					if(snapVal["filename"] == undefined){
-						for(var i in snapVal){
-							filename = snapVal[i]["filename"];
-							if(filename != undefined){
-								tempArr.push(filename);
-							}
-						}
-					}
-					else {
-						filename = snapVal["filename"];
-						if(filename != undefined){
-							tempArr.push(filename);
-						}
-					}
-				});
-				observer.next(tempArr);
-			})
-		})
-	}
-
-	// returns an array of just the "directory" names in the database
-	getAllDirNames(){
-		return new Observable<any>(observer => {
-			this.ref.on("value", snapshot => {
-				var tempArr = [];
-				snapshot.forEach(function(data) {
-					const snapVal = data.val();
-					if(snapVal["filename"] == undefined){
-						const dirName = data.key;
-						tempArr.push(data.key);
-					}
-				});
-				observer.next(tempArr);
-			})
 		})
 	}
 }
