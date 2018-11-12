@@ -13,7 +13,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 import { CookieService } from 'ngx-cookie-service';
 
-
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
@@ -35,19 +34,35 @@ describe('AppComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it(`Should parse file name correctly'`, () => {
-    var parseResults;
-    parseResults = component.parseFileName("test.txt", "test-files");
-    expect(parseResults[0]).toBeTruthy();
-
-    parseResults = component.parseFileName("test", "test-files");
-    expect(parseResults[0]).toBeFalsy();
-
-  });
 
   it(`should work this file`, () => {
-    var parseResults;
-    parseResults = component.parseFileName("thisFile.py", "test-files");
-    expect(parseResults[0]).toBeTruthy();
+    var parseResults = component.parseFileName("thisFile.py", "test-files");
+    expect(parseResults[0]).toBe(true);
+  })
+
+  it('Parses file name test.txt', () => {
+    var parseResult0 = component.parseFileName("test.txt", "test-files");
+    expect(parseResult0[0]).toBe(true);
+  })
+
+  it('Parses file name thisFile.py', () => {
+    var parseResult1 = component.parseFileName("thisFile.py", "test-files");
+    expect(parseResult1[0]).toBe(true);
+  })
+
+  it('Parses file name (blank) as invalid', () => {
+    var parseResult2 = component.parseFileName("", "test-files");
+    expect(parseResult2[0]).toBe(false);
+  })
+
+  it('Parses file names with spaces as invalid', () => {
+    var parseResult3 = component.parseFileName("this has a space.txt", "test-files");
+    expect(parseResult3[0]).toBe(false);
+
+  })
+
+  it('Parses file names with an extension but no name as false', () => {
+    var parseResult4 = component.parseFileName(".js", "test-files");
+    expect(parseResult4[0]).toBe(false);
   })
 });

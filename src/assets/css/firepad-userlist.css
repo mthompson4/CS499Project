@@ -1,8 +1,9 @@
+/* CSS for the firepad userlist*/
+
 .firepad-userlist {
   /* default height */
   height: 400px;
   min-width: 175px;
-  /*background: #000;*/
 }
 
 .firepad-userlist {
@@ -69,7 +70,7 @@ input.firepad-userlist-name-input {
   left: 38px;
   top: 23px;
   width: 300px; /* I'd rather it clip than wrap. */
-  font-size: 9px;
+  font-size: 11px;
   line-height: 11px;
 }
 

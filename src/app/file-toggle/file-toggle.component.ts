@@ -17,12 +17,11 @@ declare function toggleHelper(dirId, dirRef): any;
 })
 
 export class FileToggleComponent {
-  public newFiles: Array<any> = [];
-	filesArray: Array<Object> = [];
-	directories: Array<Object> = [];
-	isNightMode = true;
-  ref: firebase.database.Reference;
-  currentPopover: any;
+
+	filesArray: Array<Object> = []; // array of all files
+	isNightMode = true; // is it in night mode or not
+  ref: firebase.database.Reference; // reference to firebase database
+  currentPopover: any; // the current popover element
 
   @Input() parentId:string;
   @Input() dataList:any [];
@@ -34,24 +33,20 @@ export class FileToggleComponent {
     public cookie: CookieService
 	) {
     	events.subscribe('color:switched', (toMode) => {
-          console.log("COLOR SWITCHED BLAH BLAH BLAH", toMode);
       		this.isNightMode = !toMode;
     	});
 	}
 
   ngOnInit(){
     this.ref = firebase.database().ref();
+    // grab the night mode cookie
     if(this.cookie.get("developer-mode") == "day"){
-      console.log("cookie is day mode")
       this.isNightMode = false;
-    }
-    else {
-      console.log("cookie is night mode");
     }
   }
 
   ngAfterViewInit(){
-    console.log("file toggle view init");
+    // iterate through each file and add padding based on indentation level
     for(var i=0; i<this.dataList.length; i++){
       // ex: absPath = test-files/-LQHQtHCL332PHI6zrGy
       // test-files is top-level dir, so this level will = 0 b/c this file resides in it
@@ -64,19 +59,30 @@ export class FileToggleComponent {
     }
   }
 
-  // Logic from: https://stackblitz.com/edit/angular-jvaawg?file=src%2Fapp%2Ftree.component.ts
+  /**
+   * Removes current level items from tree
+   * Logic from: https://stackblitz.com/edit/angular-jvaawg?file=src%2Fapp%2Ftree.component.ts
+   * @param {datalist}: Object - the list of files
+   * @param {parentId}: String - the id of the current node's parent node
+  */
   removeCurrentLevelItems=(datalist,parentId)=>{
     //logic here to remove current level items
     return datalist.filter(item=>item.parentId!=parentId)
   }
 
+
+  /** 
+   * Right click listener for the file list elements
+   * @param {item}: Object - the item clicked
+   * @param {popover}: Object - the popover element to present
+  */
   onRightClick(item, popover) {
-    console.log("right clicked", item);
+    // if no popover, open one
     if(this.currentPopover == undefined){
       popover.open();
       this.currentPopover = popover
     }
-    else {
+    else { // close the current popover, and open the new one
       this.currentPopover.close();
       this.currentPopover = popover;
       popover.open();
@@ -84,29 +90,52 @@ export class FileToggleComponent {
     return false;
   }
 
+  /** 
+   * Toggle the directory in the file list
+   * @param {dirPath}: String - the path of the directory
+   * @param {dirId}: String - the DOM element ID of the directory element
+  */
   toggleDir(dirPath, dirId){
     let dirRef = this.ref.child(dirPath);
     toggleHelper(dirId, dirRef);
   }
 
+  /** 
+   * Set an event to delete the directory
+   * @param {dirPath}: String - the path of the directory
+  */
   deleteDir(dirPath){
     this.events.publish('directory:deleted', dirPath);
   }
 
-	// send the file to the editor that was just clicked in the filelist
+  /** 
+   * send the file to the editor that was just clicked in the filelist
+   * @param {file}: Object - the file clicked
+  */
 	fileClicked(file){
 		this.events.publish('file:toggled', file);
-    console.log("Clicked on file!", file);
 	}
 
+  /** 
+   * serve the file that was just clicked in the filelist
+   * @param {file}: Object - the file clicked
+  */
   setServeFile(file){
     this.events.publish('file:rendered', file);
   }
 
+  /** 
+   * delete the file that was just clicked in the filelist
+   * @param {file}: Object - the file clicked
+  */
   setDeleteFile(file){
     this.events.publish('file:deleted', file);
   }
 
+  /** 
+   * delete the directory that was just clicked in the filelist
+   * @param {dir}: Object - the directory clicked
+  */
   setDeleteDirectory(dir){
     this.events.publish('directory:deleted', dir.absPath);
   }

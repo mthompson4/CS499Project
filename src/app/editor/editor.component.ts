@@ -26,6 +26,12 @@ import 'codemirror/addon/edit/closebrackets.js';
 import 'codemirror/addon/edit/matchbrackets.js';
 import 'codemirror/addon/edit/matchtags.js';
 import 'codemirror/keymap/sublime.js';
+import 'codemirror/addon/dialog/dialog.js';
+import 'codemirror/addon/search/search.js';
+import 'codemirror/addon/search/searchcursor.js';
+import 'codemirror/addon/scroll/annotatescrollbar.js';
+import 'codemirror/addon/search/matchesonscrollbar.js';
+import 'codemirror/addon/search/jump-to-line.js';
 
 // external JS functions
 declare var FirepadUserList: any;
@@ -43,10 +49,12 @@ export class EditorComponent {
   currentFile;
   editingFilesArray: Array<any> = []; // an array of all the files to edit
   allFilesArray: Array<any> = []; // an array of all the files to edit
-  options = { // codemirror options
+  
+  options = { // codemirror options for the editor
     mode: {
       name: 'xml',
     },
+    extraKeys: {"Alt-F": "findPersistent"},
     tabSize: 2,
     autofocus: true,
     theme: 'monokai',
@@ -58,13 +66,16 @@ export class EditorComponent {
     keyMap: "sublime",
     lineNumbers: true,
   };
+
   firepad; // current firepad object
   ref: firebase.database.Reference; // firebase database reference
   // currentFileRef: firebase.database.Reference; // reference to the current file in the database
   userId; // userid of the current user
+  userColor; // color of current user
+  userDisplayName;
   isSaving: boolean; // boolean that keeps track of whether or not the editor is currently saving
   isNightMode = true;
-  topLevelDirectory = 'test-files';
+  topLevelDirectory = 'test-files'; // the directory name for the top-level, to be stored in firebase
   hasInitialized = false;
 
    /**
@@ -127,15 +138,28 @@ export class EditorComponent {
     this.cm = codemirrorInstance;
     this.ref = firebase.database().ref();
     this.userId = Math.floor(Math.random() * 9999).toString();
+    // random color code referenced from 
+    // https://stackoverflow.com/questions/5092808/how-do-i-randomly-generate-html-hex-color-codes-using-javascript
+    this.userColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
     this.loadRandFile();
     this.events.publish('file:updateListener', this.cm);
+
+    // See if the username cookie exists
+    let usernameCookie = this.cookie.get("user-displayName");
+    if(usernameCookie != undefined){
+      this.userDisplayName = usernameCookie;
+    }
+    // Set a listener for the current username changing
+    this.ref.child('users').child(this.userId).child('name').on("value", snapshot => {
+      this.userDisplayName = snapshot.val();
+      this.cookie.set("user-displayName", snapshot.val());
+    });
   }
 
+  /* Load a random file from the database into the editor */
   loadRandFile(){
-    console.log("loading random file");
     this.hasInitialized = false;
     this._fileService.getFiles().subscribe(files => {
-      console.log("got files in editor")
       this.allFilesArray = files;
       if(this.hasInitialized == false && files.length > 0){
         for(var i=0; i<files.length; ++i){
@@ -149,6 +173,10 @@ export class EditorComponent {
     });
   }
 
+  /**
+   * Sets the file in the editor to the inputted file
+   * @param {file}: Object - A reference to the file to be set
+  */
   setCurrentFile(file){
     this.currentFile = file;
   }
@@ -159,8 +187,8 @@ export class EditorComponent {
   */
   setFileInFirepad(file){
     document.getElementById('userlist').innerHTML = '';
-    this.firepad = Firepad.fromCodeMirror(file.ref, this.cm, { userId: this.userId});
-    var userlist = FirepadUserList.fromDiv(file.ref.child('users'), document.getElementById('userlist'), this.userId);
+    this.firepad = Firepad.fromCodeMirror(file.firepadRef, this.cm, { userId: this.userId, userColor: this.userColor});
+    var userlist = FirepadUserList.fromDiv(this.ref.child('users'), document.getElementById('userlist'), this.userId, this.userDisplayName, this.userColor, file.name);
     this.updateTimestamp();
   }
 
@@ -205,9 +233,8 @@ export class EditorComponent {
     var myblob = new Blob([message], {
         type: mimeType
     });
-    // putString saves the file to firebase storage
     var self = this;
-    console.log("Saving File To Cloud at: ", storageRef.toString());
+    // put saves the file to firebase storage
     storageRef.put(myblob).then(function(snapshot) {
       // grab the current timestamp
       let date = new Date();
@@ -224,7 +251,7 @@ export class EditorComponent {
   }
 
   /**
-   * Deletes the file
+   * Deletes the file from cloud storage
    * @param {file}: Object - The file object to delete
   */
   deleteFromStorage(file){
@@ -245,11 +272,9 @@ export class EditorComponent {
    * @param {oldFileName}: String - The previous filename
    * @param {newFileName}: String - The new filename
   */
-
-  // TODO: FIX THIS FUNCTION
   updateFileInCloud(oldFileName, newFileName){
     this.deleteFromStorage(this.currentFile);
-    this.currentFile = {
+    this.currentFile = { // update just the current file's name
       ...this.currentFile,
       name: newFileName
     };
@@ -284,10 +309,11 @@ export class EditorComponent {
     }
 
     if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
-      this.currentFile.ref.child('users').child(this.userId).remove();
+      this.currentFile.firepadRef.child('users').child(this.userId).remove();
       this.firepad.dispose();
     }
 
+    // Set only the clicked tab active
     let editorTabs = document.getElementById('editorTabs').getElementsByTagName("a");
     let clickedId = file.name + '-tab';
     for(var i=0; i<editorTabs.length; ++i){
@@ -341,32 +367,16 @@ export class EditorComponent {
     this.cm.setOption("theme", newTheme);
   }
 
-  // /**
-  //  * Creates a file and stores it in the firebase database and storage bucket
-  //  * @param {file}: Object - the name of the file to create
-  // */
-  // createFile(file){
-  //   let fileRef = this.ref.child(filePath).push();
-  //   var postData = {
-  //     "filename": filename
-  //   };
-  //   fileRef.set(postData);
-  //   let storagePath = filePath + '/' + filename;
-  //   console.log("STORAGE PATH", storagePath);
-  //   this.setCurrentFileAttributes(filename, filePath, storagePath);
-  //   this.saveToCloud(filename);
-  //   this.changeFile(filename, filePath, storagePath);
-  // }
-
   /**
    * Code that executes when a file gets created by the user
    * @param {file}: Object - The file object 
   */
   fileCreated(file){
+    console.log(file);
     var postData = {
       "filename": file.name
     };
-    file.ref.set(postData);
+    file.databaseRef.set(postData);
     this.setCurrentFile(file);
     this.saveToCloud(file);
     this.changeFile(file);
@@ -416,9 +426,13 @@ export class EditorComponent {
   }
 
 
-  // Delete the current file and switch to a new one
+  /**
+   * Delete the current file and switch to a new one
+   * @param {file}: String - the file to be deleted
+  */
   deleteFile(file){
-    file.ref.remove();
+    file.databaseRef.remove();
+    file.firepadRef.remove();
     this.deleteFromStorage(file);
     // find the index within currently editing files
     let indexOfFile = this.findNameInEditingFiles(this.currentFile.name);

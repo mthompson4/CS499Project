@@ -12,6 +12,7 @@
     }
     #firepad {
       position: absolute; left: 175px; top: 58px; bottom: 0; right: 0; height: auto;
+      overflow: auto;
     }
 
     .btn{
