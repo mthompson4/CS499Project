@@ -154,6 +154,11 @@ export class EditorComponent {
       this.userDisplayName = snapshot.val();
       this.cookie.set("user-displayName", snapshot.val());
     });
+
+    var self = this;
+    setInterval(function(){
+      self.updateTimestamp();
+    }, 60000);
   }
 
   /* Load a random file from the database into the editor */
@@ -239,7 +244,9 @@ export class EditorComponent {
       // grab the current timestamp
       let date = new Date();
       let saveTimestamp = date.toLocaleTimeString();
-      saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
+      // let saveTimestamp = date.toString();
+      // saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
+      saveTimestampElement.innerHTML = '<u>Changes Saved!</u>';
       // set the ref in the firebase database with the timestamp
       var databaseRef = firebase.database().ref().child('save').child(file.id);
       var postData = {
@@ -289,12 +296,48 @@ export class EditorComponent {
 
   // update the save timestamp when saved
   updateTimestamp(){
-    var timestampRef = this.ref.child('save').child(this.currentFile.id);
-    // listen for changes to the value of the timestamp
-    timestampRef.on('value', function(snapshot){
-      var saveTimestamp = snapshot.val()["Timestamp"];
-      document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
-    })
+    if(this.currentFile != undefined){
+      var timestampRef = this.ref.child('save').child(this.currentFile.id);
+      // listen for changes to the value of the timestamp
+      timestampRef.once('value', function(snapshot){
+        var saveTimestamp = snapshot.val()["Timestamp"];
+        var timestampStr;
+        // Relative time code referenced from: https://stackoverflow.com/questions/7709803/javascript-get-minutes-between-two-dates
+        // let savedAtDate = +new Date(saveTimestamp);
+        // let currentTime = +new Date();
+        // let diffMs = (currentTime - savedAtDate);
+        // let diffDays = Math.floor(diffMs / 86400000); // days
+        // let diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
+        // let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+        // // console.log(`Last Saved: ${diffDays} Days ${diffHrs} Hours and ${diffMins} Minutes ago`);
+
+        // if(diffDays > 0){
+        //   if (diffDays == 1) {
+        //     timestampStr = `${diffDays} Days Ago`;
+        //   }
+        //   else {
+        //     timestampStr = `${diffDays} Days Ago`;
+        //   }
+        // }
+        // else if (diffHrs == 0) {
+        //   if(diffMins == 0){
+        //     timestampStr = `Less Than a Minute Ago`;
+        //   }
+        //   else if(diffMins == 1){
+        //     timestampStr = `${diffMins} Minute Ago`;
+        //   }
+        //   else {
+        //     timestampStr = `${diffMins} Minutes Ago`;
+        //   }
+        // }
+        // else {
+        //   timestampStr = `${diffHrs} Hours and ${diffMins} Minutes ago`;
+        //}
+        // document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved ' + timestampStr + '</u>';
+        document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved ' + saveTimestamp + '</u>';
+
+      })
+    }
   }
 
   /**
@@ -387,9 +430,39 @@ export class EditorComponent {
    * @param {dirPath}: String - the path of the directory to delete
   */
   deleteDirectory(dirPath){
-    this.deleteDirectoryFromStorage(dirPath);
-    this.loadRandFile();
+    if(this.canDeleteDirectory(dirPath)){
+      this.deleteDirectoryFromStorage(dirPath);
+      this.loadRandFile();
+    } 
+    else {
+      alert("Cannot Delete Directory: Other users are modifying files under this directory");
+    }
   }
+
+  /**
+   * Checks to see if a directory can be deleted
+   * @param {dirname}: String - the name of the directory to delete
+  */
+  canDeleteDirectory(dirPath){
+    var canDelete = true;
+    let dirPathSplit = dirPath.split('/');
+    let dirName = dirPathSplit[dirPathSplit.length - 1]; // dirname is the last name in path
+    this.hasInitialized = false;
+    this._fileService.getFiles().subscribe(files => {
+      if(this.hasInitialized == false && files.length > 0){
+        for(var i=0; i<files.length; ++i){
+          // check if file is in directory
+          if(files[i].storagePath.includes(dirName) && files[i].isFile == true){
+            if(this.canDeleteFile(files[i]) == false){
+              canDelete = false;
+            }
+          }
+        }
+      }
+    });
+    return canDelete;
+  }
+
 
   /**
    * Delete the directory from Firebase cloud storage
@@ -427,25 +500,52 @@ export class EditorComponent {
 
 
   /**
+   * Checks to see if you can delete the given file
+   * @param {file}: String - the file to be deleted
+  */
+  canDeleteFile(file): boolean{
+    var self = this;
+    var canDelete = true;
+    this.ref.child('users').once("value", snapshot => {
+      snapshot.forEach(function(data) {
+        let userData = data.val();
+        if(data.key != self.userId) {
+          if(userData["currentFile"] == file.name) { // another user is viewing that file
+            canDelete = false;
+          }
+        }
+      });
+    })
+    return canDelete
+  }
+
+
+  /**
    * Delete the current file and switch to a new one
    * @param {file}: String - the file to be deleted
   */
   deleteFile(file){
-    file.databaseRef.remove();
-    file.firepadRef.remove();
-    this.deleteFromStorage(file);
-    // find the index within currently editing files
-    let indexOfFile = this.findNameInEditingFiles(this.currentFile.name);
-    if(indexOfFile > -1){
-      // delete the file from the tabs
-      this.editingFilesArray.splice(indexOfFile, 1);
 
-      if(this.editingFilesArray.length == 0){
-        this.loadRandFile();
-      }
-      else {
-        let fileToChange = this.editingFilesArray[indexOfFile-1];
-        this.changeFile(fileToChange);
+    if(this.canDeleteFile(file) == false){
+      alert("Cannot delete file: Another user is currently editing it");
+    }
+    else {
+      file.databaseRef.remove();
+      file.firepadRef.remove();
+      this.deleteFromStorage(file);
+      // find the index within currently editing files
+      let indexOfFile = this.findNameInEditingFiles(this.currentFile.name);
+      if(indexOfFile > -1){
+        // delete the file from the tabs
+        this.editingFilesArray.splice(indexOfFile, 1);
+
+        if(this.editingFilesArray.length == 0){
+          this.loadRandFile();
+        }
+        else {
+          let fileToChange = this.editingFilesArray[indexOfFile-1];
+          this.changeFile(fileToChange);
+        }
       }
     }
   }
