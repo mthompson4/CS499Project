@@ -17,5 +17,13 @@
 </ul>
 </ng-container>
 
-<codemirror [config]="options" id="codemirrorElement"></codemirror>
-<!-- <image-editor></image-editor> -->
+
+<ng-container *ngIf="isEditingImage; then imageItem; else fileItem"></ng-container>
+
+<ng-template #imageItem>
+	<image-editor></image-editor>
+</ng-template>
+
+<ng-template #fileItem>
+	<codemirror [config]="options" id="codemirrorElement"></codemirror>
+</ng-template>

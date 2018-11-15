@@ -47,6 +47,7 @@ export class EditorComponent {
   @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
   cm: any; // reference to the codemirror object
   currentFile;
+  isEditingImage = false; // needed b/c currentFile is undefined on init
   editingFilesArray: Array<any> = []; // an array of all the files to edit
   allFilesArray: Array<any> = []; // an array of all the files to edit
   
@@ -98,6 +99,7 @@ export class EditorComponent {
     events.subscribe('file:created', (file) => { // a new file is created
       this.fileCreated(file);
     });
+
     events.subscribe('file:rendered', (file) => { // the file is to be served
       this.serveFile(file);
     });
@@ -184,6 +186,12 @@ export class EditorComponent {
   */
   setCurrentFile(file){
     this.currentFile = file;
+    if(file.isImage){
+      this.isEditingImage = true;
+    }
+    else {
+      this.isEditingImage = false;
+    }
   }
 
   /**
@@ -211,7 +219,11 @@ export class EditorComponent {
       'md': 'text/markdown',
       'php': 'text/php',
       'css': 'text/css',
-      'txt': 'text/plain'
+      'txt': 'text/plain', 
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg'
     }
     let type = mimeTypes[extension];
     if(type != undefined){
@@ -345,35 +357,42 @@ export class EditorComponent {
    * @param {file}: Object - A reference the file object to change to
   */
   changeFile(file){
-    // create an object containing the filename & path to be stored for the editor tab interface
-    this.events.publish('filename:updated', file);
-    if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {
-      this.editingFilesArray.push(file);
-    }
 
-    if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
-      this.currentFile.firepadRef.child('users').child(this.userId).remove();
-      this.firepad.dispose();
+    if(file.isImage == true){ // load image file
+      console.log("FILE IS AN IMAGE");
+      this.setCurrentFile(file);
     }
+    else { // load regular editor file
+      // create an object containing the filename & path to be stored for the editor tab interface
+      this.events.publish('filename:updated', file);
+      if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {
+        this.editingFilesArray.push(file);
+      }
 
-    // Set only the clicked tab active
-    let editorTabs = document.getElementById('editorTabs').getElementsByTagName("a");
-    let clickedId = file.name + '-tab';
-    for(var i=0; i<editorTabs.length; ++i){
-      if(editorTabs[i].id == clickedId){
-        editorTabs[i].classList.add('active');
+      if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
+        this.currentFile.firepadRef.child('users').child(this.userId).remove();
+        this.firepad.dispose();
       }
-      else {
-        editorTabs[i].classList.remove('active');
+
+      // Set only the clicked tab active
+      let editorTabs = document.getElementById('editorTabs').getElementsByTagName("a");
+      let clickedId = file.name + '-tab';
+      for(var i=0; i<editorTabs.length; ++i){
+        if(editorTabs[i].id == clickedId){
+          editorTabs[i].classList.add('active');
+        }
+        else {
+          editorTabs[i].classList.remove('active');
+        }
       }
+      // set attributes for new filename
+      this.setCurrentFile(file);
+      this.cm.setValue('');
+      this.setFileInFirepad(file);
+      this.changeMode(file.name);
+      this.updateTimestamp();
+      this.events.publish('file:updateListener', this.cm);
     }
-    // set attributes for new filename
-    this.setCurrentFile(file);
-    this.cm.setValue('');
-    this.setFileInFirepad(file);
-    this.changeMode(file.name);
-    this.updateTimestamp();
-    this.events.publish('file:updateListener', this.cm);
   }
 
   /**
@@ -415,14 +434,20 @@ export class EditorComponent {
    * @param {file}: Object - The file object 
   */
   fileCreated(file){
-    console.log(file);
     var postData = {
-      "filename": file.name
+      "filename": file.name,
+      "isImage": file.isImage
     };
     file.databaseRef.set(postData);
-    this.setCurrentFile(file);
-    this.saveToCloud(file);
-    this.changeFile(file);
+
+    if(file.isImage) {
+      console.log("this is an image");
+    }
+    else {
+      this.setCurrentFile(file);
+      this.saveToCloud(file);
+      this.changeFile(file);
+    }
   }
 
   /**

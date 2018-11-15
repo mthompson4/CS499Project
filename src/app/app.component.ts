@@ -37,6 +37,7 @@ export class AppComponent {
   isCollapsed = false; // if the sidebar is collapsed or not
   isNightMode = true; // if it is night mode or not
   public filesArr: Array<any> = [];
+  fileToUpload: File;
 
   @ViewChild('username-input') input;
 
@@ -73,6 +74,11 @@ export class AppComponent {
       { // Delete a directory
         key: ['cmd + b'],
         command: () => presentModal('#deleteDirModal'),
+        preventDefault: true
+      },
+      { // Delete a directory
+        key: ['cmd + i'],
+        command: () => presentModal('#uploadImageModal'),
         preventDefault: true
       },
 
@@ -186,7 +192,8 @@ export class AppComponent {
    * @param {form}: NgForm - the returned form data
   */
   fileCreated(form : NgForm) {
-    var newDirPath = form.value["toDirectory"]
+    var newDirPath = form.value["toDirectory"];
+    console.log(form.value);
     if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
         newDirPath = this.topLevelDir;
     }
@@ -206,6 +213,7 @@ export class AppComponent {
       let file = {
         id: newFileRef.key,
         isFile: true,
+        isImage: false,
         name: newFileName,
         isToggled: false,
         absPath: fileAbsPath,
@@ -250,6 +258,59 @@ export class AppComponent {
 
       closeModal('#newDirModal');
     }
+  }
+
+
+  /** 
+   * Create an image object when the upload image form is completed
+   * @param {form}: NgForm - the returned form data
+  */
+  imageUploaded(form : NgForm) {
+    var newDirPath = form.value["toDirectory"]
+    if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
+        newDirPath = this.topLevelDir;
+    }
+    if(this.fileToUpload == undefined) {
+      console.log("no file provided");
+    }
+    else {
+      console.log(this.fileToUpload);
+      var storageRef = firebase.storage().ref().child(newDirPath).child(this.fileToUpload.name);
+      var self = this;
+      storageRef.put(this.fileToUpload).then(function(snapshot) {
+        console.log('image uploaded!')
+        // Create a file object with various metatdata
+        let newFileRef = self.ref.child(newDirPath).push();
+        let fileAbsPath = newDirPath + '/' + newFileRef.key;
+        let storagePath = newDirPath + '/' + self.fileToUpload.name;
+        let splitPath = newDirPath.split('/');
+        let parentNodeId = splitPath[splitPath.length-1];
+        
+        let file = {
+          id: newFileRef.key,
+          isFile: true,
+          isImage: true,
+          name: self.fileToUpload.name,
+          isToggled: false,
+          absPath: fileAbsPath,
+          storagePath: storagePath,
+          parent: parentNodeId,
+          databaseRef: newFileRef,
+          firepadRef: self.ref.child('firepad').child(newFileRef.key)
+        }
+
+        self.currentFileName = self.fileToUpload.name;
+        self.events.publish('file:created', file);
+
+      });
+    }
+    closeModal('#uploadImageModal');
+
+  }
+
+  // sets the current image when uploaded
+  handleFileInput(files: FileList){
+    this.fileToUpload = files.item(0);
   }
 
 

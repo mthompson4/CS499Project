@@ -113,7 +113,7 @@ export class FileToggleComponent {
    * @param {file}: Object - the file clicked
   */
 	fileClicked(file){
-		this.events.publish('file:toggled', file);
+    this.events.publish('file:toggled', file);
 	}
 
   /** 

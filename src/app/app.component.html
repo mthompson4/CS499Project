@@ -40,6 +40,17 @@
                     </div>     
                   </div>
 
+                <!-- Add a new image -->
+                  <div class="row bg-dark text-white">
+                    <div class="col-md-6 testy bg-dark text-white">
+                      <a class="dropdown-item vcenter bg-dark text-white" data-toggle="modal" data-target="#uploadImageModal"><img src="/assets/open-iconic/svg/camera-slr.svg" width="14" height="14"> Upload Image</a>
+                    </div>
+                    <div class="col-sm-4 testy bg-dark text-white">
+                      <span class="bg-dark text-white shortcut"><img src="/assets/open-iconic/svg/command.svg" width="12" height="12"> + I</span>
+                    </div>     
+                  </div>
+
+
                 <!-- Serve the current file -->
                 <div class="row bg-dark text-white">
                     <div class="col-md-6 testy bg-dark text-white">
@@ -109,6 +120,7 @@
       </div>
       <code-editor id="firepad"></code-editor>
 
+
       <!-- New File Modal -->
       <div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -138,6 +150,45 @@
              <div id="newFileModalError" class="alert alert-danger invisible" role="alert">
               No file extension found.
             </div>
+            <div class="modal-footer">
+             <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+             <button type="submit" class="btn btn-light">Add</button>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Upload Image Modal -->
+      <div class="modal fade" id="uploadImageModal" tabindex="-1" role="dialog" aria-labelledby="uploadImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content bg-dark text-white">
+            <div class="modal-header bg-dark text-white">
+              <h5 class="modal-title bg-dark text-white" id="uploadImageModalLabel">Upload Image!</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          <form (ngSubmit)="imageUploaded(e)" #e="ngForm" class="jumbotron bg-dark text-white">
+            <div class="form-group bg-dark text-white">
+              <label for="exampleFileName">Upload Image</label>
+              <input id="fileInput" class="form-control-file bg-dark text-white" type="file" name="imageFile" ngModel aria-describedby="fileHelp" accept=".jpg, .png, .gif" (change)="handleFileInput($event.target.files)">
+              <small id="fileHelp" class="form-text text-muted bg-dark text-white">Only can upload .png, .jpg, and .gif</small>
+            </div>
+
+            <div class="form-group bg-dark text-white">
+              <label for="residingDirectory">Residing Directory</label>
+              <select class="form-control bg-dark text-white" id="residingDirectory" name="toDirectory" ngModel>
+                <option [ngValue]="null" selected disabled>Choose a Directory</option>
+                <option [ngValue]="topLevelDir">Top Level Directory (./)</option>
+                <ng-container *ngFor="let file of filesArr">
+                  <option *ngIf="!file.isFile" value="{{ file.absPath }}">{{ file.name }} ({{file.absPath.replace('test-files', '.')}})</option>
+                </ng-container>
+              </select>
+            </div>
+
             <div class="modal-footer">
              <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
              <button type="submit" class="btn btn-light">Add</button>
