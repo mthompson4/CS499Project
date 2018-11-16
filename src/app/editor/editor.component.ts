@@ -120,6 +120,7 @@ export class EditorComponent {
       var self = this;
       var timeoutHandler;
       this.cm.on("change", function(cm, change) {
+        console.log("changed");
         if(!self.isSaving) {
           console.log("Waiting to save...");
           self.isSaving = true;
@@ -188,6 +189,7 @@ export class EditorComponent {
     this.currentFile = file;
     if(file.isImage){
       this.isEditingImage = true;
+      // this.isEditingImage = false;
     }
     else {
       this.isEditingImage = false;
@@ -202,6 +204,10 @@ export class EditorComponent {
     document.getElementById('userlist').innerHTML = '';
     this.firepad = Firepad.fromCodeMirror(file.firepadRef, this.cm, { userId: this.userId, userColor: this.userColor});
     var userlist = FirepadUserList.fromDiv(this.ref.child('users'), document.getElementById('userlist'), this.userId, this.userDisplayName, this.userColor, file.name);
+    var self = this;
+    this.firepad.on('ready', function() {
+      console.log("WOOOOHOOOO WE READY");
+    });
     this.updateTimestamp();
   }
 
@@ -276,7 +282,6 @@ export class EditorComponent {
   deleteFromStorage(file){
     // Create a reference to the file to delete
     var storageRef = firebase.storage().ref().child(file.storagePath);
-    console.log("Deleting from storage at",storageRef);
     storageRef.delete().then(function() {
       // File deleted successfully
       console.log('file deleted successfully!');
@@ -357,42 +362,66 @@ export class EditorComponent {
    * @param {file}: Object - A reference the file object to change to
   */
   changeFile(file){
-
     if(file.isImage == true){ // load image file
-      console.log("FILE IS AN IMAGE");
-      this.setCurrentFile(file);
+      // this.loadImage(file);
+      this.loadFile(file);
     }
-    else { // load regular editor file
-      // create an object containing the filename & path to be stored for the editor tab interface
-      this.events.publish('filename:updated', file);
-      if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {
-        this.editingFilesArray.push(file);
-      }
-
-      if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
-        this.currentFile.firepadRef.child('users').child(this.userId).remove();
-        this.firepad.dispose();
-      }
-
-      // Set only the clicked tab active
-      let editorTabs = document.getElementById('editorTabs').getElementsByTagName("a");
-      let clickedId = file.name + '-tab';
-      for(var i=0; i<editorTabs.length; ++i){
-        if(editorTabs[i].id == clickedId){
-          editorTabs[i].classList.add('active');
-        }
-        else {
-          editorTabs[i].classList.remove('active');
-        }
-      }
-      // set attributes for new filename
-      this.setCurrentFile(file);
-      this.cm.setValue('');
-      this.setFileInFirepad(file);
-      this.changeMode(file.name);
-      this.updateTimestamp();
-      this.events.publish('file:updateListener', this.cm);
+    else {
+      this.loadFile(file);
     }
+  }
+
+  /**
+   * Makes necessary changes to load an image
+   * @param {image}: Object - A reference the image object to change to
+  */
+  loadImage(image){
+    this.setCurrentFile(image);
+    this.events.publish('filename:updated', image.name);
+    if (this.editingFilesArray.filter(f => f.name === image.name).length == 0) {
+      this.editingFilesArray.push(image);
+    }
+
+    if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
+      this.currentFile.firepadRef.child('users').child(this.userId).remove();
+      this.firepad.dispose();
+    }
+  }
+
+  /**
+   * Makes necessary changes to load a file
+   * @param {file}: Object - A reference the file object to change to
+  */
+  loadFile(file){
+    // create an object containing the filename & path to be stored for the editor tab interface
+    this.events.publish('filename:updated', file);
+    if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {
+      this.editingFilesArray.push(file);
+    }
+
+    if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
+      this.currentFile.firepadRef.child('users').child(this.userId).remove();
+      this.firepad.dispose();
+    }
+
+    // Set only the clicked tab active
+    let editorTabs = document.getElementById('editorTabs').getElementsByTagName("a");
+    let clickedId = file.name + '-tab';
+    for(var i=0; i<editorTabs.length; ++i){
+      if(editorTabs[i].id == clickedId){
+        editorTabs[i].classList.add('active');
+      }
+      else {
+        editorTabs[i].classList.remove('active');
+      }
+    }
+    // set attributes for new filename
+    this.setCurrentFile(file);
+    this.cm.setValue('');
+    this.setFileInFirepad(file);
+    this.changeMode(file.name);
+    this.updateTimestamp();
+    this.events.publish('file:updateListener', this.cm);
   }
 
   /**

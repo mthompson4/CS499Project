@@ -1,3 +1,7 @@
 #codemirrorElement {
 	overflow: auto;
 }
+
+#testEditor {
+	z-index: 2;
+}
