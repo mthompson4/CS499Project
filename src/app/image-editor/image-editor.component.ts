@@ -1,18 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'image-editor',
   templateUrl: './image-editor.component.html',
-  styleUrls: ['./image-editor.component.css']
+  styleUrls: ['./image-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.Default
 })
-export class ImageEditorComponent{
+export class ImageEditorComponent implements OnChanges{
 
-    public config = {
-	    ImageName: ' ',
-	    AspectRatios: ["4:3", "16:9"],
-	    ImageUrl: 'https://static.pexels.com/photos/248797/pexels-photo-248797.jpeg',
-	    ImageType: 'image/jpeg'
-  	}
+  @Input() imageConfig:any [];
+
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log("I WAS CHANGED THIS TIME!");
+    console.log(this.imageConfig);
+  }
 
   public close() {
     // Fired when the editor is closed.

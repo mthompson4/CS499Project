@@ -68,6 +68,13 @@ export class EditorComponent {
     lineNumbers: true,
   };
 
+  imageConfig = {
+    ImageName: ' ',
+    AspectRatios: ["4:3", "16:9"],
+    ImageUrl: '',
+    ImageType: 'image/png'
+  }
+
   firepad; // current firepad object
   ref: firebase.database.Reference; // firebase database reference
   // currentFileRef: firebase.database.Reference; // reference to the current file in the database
@@ -187,13 +194,13 @@ export class EditorComponent {
   */
   setCurrentFile(file){
     this.currentFile = file;
-    if(file.isImage){
-      this.isEditingImage = true;
-      // this.isEditingImage = false;
-    }
-    else {
-      this.isEditingImage = false;
-    }
+    // if(file.isImage){
+    //   this.isEditingImage = true;
+    //   // this.isEditingImage = false;
+    // }
+    // else {
+    //   this.isEditingImage = false;
+    // }
   }
 
   /**
@@ -205,8 +212,11 @@ export class EditorComponent {
     this.firepad = Firepad.fromCodeMirror(file.firepadRef, this.cm, { userId: this.userId, userColor: this.userColor});
     var userlist = FirepadUserList.fromDiv(this.ref.child('users'), document.getElementById('userlist'), this.userId, this.userDisplayName, this.userColor, file.name);
     var self = this;
+    // workaround hack that forces a re-render of the image editor component b/c can't manually change images
     this.firepad.on('ready', function() {
-      console.log("WOOOOHOOOO WE READY");
+      if(file.isImage){
+        self.isEditingImage = true;
+      }
     });
     this.updateTimestamp();
   }
@@ -258,21 +268,23 @@ export class EditorComponent {
     });
     var self = this;
     // put saves the file to firebase storage
-    storageRef.put(myblob).then(function(snapshot) {
-      // grab the current timestamp
-      let date = new Date();
-      let saveTimestamp = date.toLocaleTimeString();
-      // let saveTimestamp = date.toString();
-      // saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
-      saveTimestampElement.innerHTML = '<u>Changes Saved!</u>';
-      // set the ref in the firebase database with the timestamp
-      var databaseRef = firebase.database().ref().child('save').child(file.id);
-      var postData = {
-        "Timestamp": saveTimestamp
-      };
-      databaseRef.set(postData);
-      self.isSaving = false;
-    });
+    if(!file.isImage) {
+      storageRef.put(myblob).then(function(snapshot) {
+        // grab the current timestamp
+        let date = new Date();
+        let saveTimestamp = date.toLocaleTimeString();
+        // let saveTimestamp = date.toString();
+        // saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
+        saveTimestampElement.innerHTML = '<u>Changes Saved!</u>';
+        // set the ref in the firebase database with the timestamp
+        var databaseRef = firebase.database().ref().child('save').child(file.id);
+        var postData = {
+          "Timestamp": saveTimestamp
+        };
+        databaseRef.set(postData);
+        self.isSaving = false;
+      });
+    }
   }
 
   /**
@@ -307,7 +319,7 @@ export class EditorComponent {
 
   // Render the current file in a new browser window
   serveFile(file){
-    var url = `http://files.cloud-code.net/${file.storagePath}`;;
+    var url = `http://files.cloud-code.net/${file.storagePath}`;
     window.open(url, '_blank');
   }
 
@@ -362,30 +374,25 @@ export class EditorComponent {
    * @param {file}: Object - A reference the file object to change to
   */
   changeFile(file){
-    if(file.isImage == true){ // load image file
-      // this.loadImage(file);
-      this.loadFile(file);
+    if(file.isImage == true){ // set the image config details in editor
+      this.setImageConfig(file);
+      this.isEditingImage = false;
     }
-    else {
-      this.loadFile(file);
-    }
+    this.loadFile(file);
   }
 
   /**
    * Makes necessary changes to load an image
    * @param {image}: Object - A reference the image object to change to
   */
-  loadImage(image){
-    this.setCurrentFile(image);
-    this.events.publish('filename:updated', image.name);
-    if (this.editingFilesArray.filter(f => f.name === image.name).length == 0) {
-      this.editingFilesArray.push(image);
-    }
-
-    if(this.currentFile != undefined){ // if there is a current file, remove its user data for that user
-      this.currentFile.firepadRef.child('users').child(this.userId).remove();
-      this.firepad.dispose();
-    }
+  setImageConfig(image){
+    var storage = firebase.storage();
+    var storageRef = storage.ref().child(image.storagePath);
+    var url = `http://files.cloud-code.net/${image.storagePath}`;
+    this.imageConfig = {
+      ...this.imageConfig,
+      ImageUrl: url
+    };
   }
 
   /**
@@ -393,6 +400,7 @@ export class EditorComponent {
    * @param {file}: Object - A reference the file object to change to
   */
   loadFile(file){
+    this.isEditingImage = false;
     // create an object containing the filename & path to be stored for the editor tab interface
     this.events.publish('filename:updated', file);
     if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {

@@ -17,18 +17,5 @@
 </ul>
 </ng-container>
 
-
-<!-- <ng-container *ngIf="isEditingImage; then imageItem; else fileItem"></ng-container> -->
-
-<!-- <ng-template #imageItem>
-	<image-editor></image-editor>
-	<codemirror hidden [config]="options" id="codemirrorElement"></codemirror>
-</ng-template>
-
-<ng-template #fileItem>
-	<codemirror [config]="options" id="codemirrorElement"></codemirror>
-</ng-template>
- -->
-
 <codemirror [hidden]="isEditingImage" [config]="options" id="codemirrorElement"></codemirror>
-<image-editor *ngIf="isEditingImage"></image-editor>
+<image-editor [imageConfig]="imageConfig" *ngIf="isEditingImage"></image-editor>
