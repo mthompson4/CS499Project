@@ -106,7 +106,6 @@ export class EditorComponent {
     events.subscribe('file:created', (file) => { // a new file is created
       this.fileCreated(file);
     });
-
     events.subscribe('file:rendered', (file) => { // the file is to be served
       this.serveFile(file);
     });

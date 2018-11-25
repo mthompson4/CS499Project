@@ -95,6 +95,11 @@ export class AppComponent {
       this.currentFileName = file.name;
       this.currentFile = file;
     });
+
+    // User updates the image
+    events.subscribe('image:updated', (image) => {
+      this.updateImage(image);
+    });
    }
 
   ngOnInit(){
@@ -261,6 +266,43 @@ export class AppComponent {
   }
 
 
+  updateImage(image){
+    var storageRef = firebase.storage().ref().child(this.currentFile.storagePath);
+    var self = this;
+    storageRef.put(image).then(function(snapshot) {
+      console.log("file updated!!!!!");
+      self.events.publish('file:created', self.currentFile);
+    });
+  }
+
+  saveImage(image, filePath, imageName){
+    var storageRef = firebase.storage().ref().child(filePath).child(imageName);
+    var self = this;
+    storageRef.put(image).then(function(snapshot) {
+      // Create a file object with various metatdata
+      let newFileRef = self.ref.child(filePath).push();
+      let fileAbsPath = filePath + '/' + newFileRef.key;
+      let storagePath = filePath + '/' + imageName;
+      let splitPath = filePath.split('/');
+      let parentNodeId = splitPath[splitPath.length-1];
+      
+      let file = {
+        id: newFileRef.key,
+        isFile: true,
+        isImage: true,
+        name: imageName,
+        isToggled: false,
+        absPath: fileAbsPath,
+        storagePath: storagePath,
+        parent: parentNodeId,
+        databaseRef: newFileRef,
+        firepadRef: self.ref.child('firepad').child(newFileRef.key)
+      }
+      self.currentFileName = imageName;
+      self.events.publish('file:created', file);
+    });
+  }
+
   /** 
    * Create an image object when the upload image form is completed
    * @param {form}: NgForm - the returned form data
@@ -275,34 +317,7 @@ export class AppComponent {
     }
     else {
       console.log(this.fileToUpload);
-      var storageRef = firebase.storage().ref().child(newDirPath).child(this.fileToUpload.name);
-      var self = this;
-      storageRef.put(this.fileToUpload).then(function(snapshot) {
-        console.log('image uploaded!')
-        // Create a file object with various metatdata
-        let newFileRef = self.ref.child(newDirPath).push();
-        let fileAbsPath = newDirPath + '/' + newFileRef.key;
-        let storagePath = newDirPath + '/' + self.fileToUpload.name;
-        let splitPath = newDirPath.split('/');
-        let parentNodeId = splitPath[splitPath.length-1];
-        
-        let file = {
-          id: newFileRef.key,
-          isFile: true,
-          isImage: true,
-          name: self.fileToUpload.name,
-          isToggled: false,
-          absPath: fileAbsPath,
-          storagePath: storagePath,
-          parent: parentNodeId,
-          databaseRef: newFileRef,
-          firepadRef: self.ref.child('firepad').child(newFileRef.key)
-        }
-
-        self.currentFileName = self.fileToUpload.name;
-        self.events.publish('file:created', file);
-
-      });
+      this.saveImage(this.fileToUpload, newDirPath, this.fileToUpload.name);
     }
     closeModal('#uploadImageModal');
 

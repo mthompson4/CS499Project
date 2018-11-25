@@ -1,19 +1,18 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Input} from '@angular/core';
+import { Events } from 'ionic-angular';
 
 @Component({
   selector: 'image-editor',
   templateUrl: './image-editor.component.html',
-  styleUrls: ['./image-editor.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default
+  styleUrls: ['./image-editor.component.css']
 })
-export class ImageEditorComponent implements OnChanges{
+export class ImageEditorComponent {
 
   @Input() imageConfig:any [];
 
-
-  ngOnChanges(changes: SimpleChanges) {
-    console.log("I WAS CHANGED THIS TIME!");
-    console.log(this.imageConfig);
+  constructor(
+    public events: Events
+  ) {
   }
 
   public close() {
@@ -22,7 +21,7 @@ export class ImageEditorComponent implements OnChanges{
   }
 
   public getEditedFile(file: File) {
-    // Fired when the file has been processed.
-    console.log("got file", file);
+    console.log("image updated", file);
+    this.events.publish('image:updated', file);
   }
 }
