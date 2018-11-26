@@ -70,7 +70,7 @@ export class EditorComponent {
 
   imageConfig = {
     ImageName: ' ',
-    AspectRatios: ["4:3", "16:9"],
+    AspectRatios: ["1:1", "2:3", "4:3", "16:9"],
     ImageUrl: '',
     ImageType: 'image/png'
   }
@@ -193,13 +193,6 @@ export class EditorComponent {
   */
   setCurrentFile(file){
     this.currentFile = file;
-    // if(file.isImage){
-    //   this.isEditingImage = true;
-    //   // this.isEditingImage = false;
-    // }
-    // else {
-    //   this.isEditingImage = false;
-    // }
   }
 
   /**
@@ -254,20 +247,20 @@ export class EditorComponent {
    * @param {file}: Object - The file
   */
   saveToCloud(file){
-    // grab the timestamp element
-    var saveTimestampElement = document.getElementById('saveTimestamp');
-    saveTimestampElement.innerHTML = 'Saving......';
-    // set a reference to the file in the storage bucket
-    var storageRef = firebase.storage().ref().child(this.currentFile.storagePath)
-    // grab the contents of the editor as a string
-    let mimeType = this.matchMimeType(file.name);
-    var message = this.firepad.getText();
-    var myblob = new Blob([message], {
-        type: mimeType
-    });
-    var self = this;
     // put saves the file to firebase storage
     if(!file.isImage) {
+      // grab the timestamp element
+      var saveTimestampElement = document.getElementById('saveTimestamp');
+      saveTimestampElement.innerHTML = 'Saving......';
+      // set a reference to the file in the storage bucket
+      var storageRef = firebase.storage().ref().child(this.currentFile.storagePath)
+      // grab the contents of the editor as a string
+      let mimeType = this.matchMimeType(file.name);
+      var message = this.firepad.getText();
+      var myblob = new Blob([message], {
+          type: mimeType
+      });
+      var self = this;
       storageRef.put(myblob).then(function(snapshot) {
         // grab the current timestamp
         let date = new Date();
@@ -283,6 +276,9 @@ export class EditorComponent {
         databaseRef.set(postData);
         self.isSaving = false;
       });
+    }
+    else {
+      this.isSaving = false;
     }
   }
 
@@ -390,7 +386,8 @@ export class EditorComponent {
     var url = `http://files.cloud-code.net/${image.storagePath}`;
     this.imageConfig = {
       ...this.imageConfig,
-      ImageUrl: url
+      ImageUrl: url, 
+      ImageType: this.matchMimeType(image.name)
     };
   }
 

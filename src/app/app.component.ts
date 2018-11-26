@@ -266,12 +266,15 @@ export class AppComponent {
   }
 
 
+  /** 
+   * Updates an image object in cloud storage
+   * @param {image}: File - the image object data
+  */
   updateImage(image){
     var storageRef = firebase.storage().ref().child(this.currentFile.storagePath);
     var self = this;
     storageRef.put(image).then(function(snapshot) {
-      console.log("file updated!!!!!");
-      self.events.publish('file:created', self.currentFile);
+      self.events.publish('file:toggled', self.currentFile);
     });
   }
 
