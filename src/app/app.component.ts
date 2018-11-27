@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 import { CookieService } from 'ngx-cookie-service';
 import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
@@ -107,6 +107,7 @@ export class AppComponent {
     this.editFileName();
     this.populateFilesArr();
     modalListener('#newFileModal', '#newFileModalError');
+    modalListener('#uploadImageModal', '#newFileModalError');
   }
 
   ngAfterViewInit(){

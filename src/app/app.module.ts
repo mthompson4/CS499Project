@@ -9,7 +9,7 @@ import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
 import { CodemirrorModule } from 'ng2-codemirror';
 import { FormsModule } from '@angular/forms';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 import { CookieService } from 'ngx-cookie-service';
 import { EditorComponent } from './editor/editor.component';
 import { KeyboardShortcutsModule } from 'ng-keyboard-shortcuts';

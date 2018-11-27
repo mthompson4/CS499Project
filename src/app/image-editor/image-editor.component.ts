@@ -1,5 +1,5 @@
 import { Component, OnInit, Input} from '@angular/core';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 
 @Component({
   selector: 'image-editor',

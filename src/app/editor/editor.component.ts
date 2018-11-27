@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ViewChild, Input } from '@angular/core';
 import { ActivatedRoute, Router, Event } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 import { CookieService } from 'ngx-cookie-service';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
