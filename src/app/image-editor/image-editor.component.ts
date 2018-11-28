@@ -21,7 +21,6 @@ export class ImageEditorComponent {
   }
 
   public getEditedFile(file: File) {
-    console.log("image updated", file);
     this.events.publish('image:updated', file);
   }
 }

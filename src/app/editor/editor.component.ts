@@ -326,38 +326,6 @@ export class EditorComponent {
       timestampRef.once('value', function(snapshot){
         var saveTimestamp = snapshot.val()["Timestamp"];
         var timestampStr;
-        // Relative time code referenced from: https://stackoverflow.com/questions/7709803/javascript-get-minutes-between-two-dates
-        // let savedAtDate = +new Date(saveTimestamp);
-        // let currentTime = +new Date();
-        // let diffMs = (currentTime - savedAtDate);
-        // let diffDays = Math.floor(diffMs / 86400000); // days
-        // let diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
-        // let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-        // // console.log(`Last Saved: ${diffDays} Days ${diffHrs} Hours and ${diffMins} Minutes ago`);
-
-        // if(diffDays > 0){
-        //   if (diffDays == 1) {
-        //     timestampStr = `${diffDays} Days Ago`;
-        //   }
-        //   else {
-        //     timestampStr = `${diffDays} Days Ago`;
-        //   }
-        // }
-        // else if (diffHrs == 0) {
-        //   if(diffMins == 0){
-        //     timestampStr = `Less Than a Minute Ago`;
-        //   }
-        //   else if(diffMins == 1){
-        //     timestampStr = `${diffMins} Minute Ago`;
-        //   }
-        //   else {
-        //     timestampStr = `${diffMins} Minutes Ago`;
-        //   }
-        // }
-        // else {
-        //   timestampStr = `${diffHrs} Hours and ${diffMins} Minutes ago`;
-        //}
-        // document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved ' + timestampStr + '</u>';
         document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved ' + saveTimestamp + '</u>';
 
       })
