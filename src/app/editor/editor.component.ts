@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ViewChild, Input } from '@angular/core';
 import { ActivatedRoute, Router, Event } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 import { CookieService } from 'ngx-cookie-service';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
@@ -47,6 +47,7 @@ export class EditorComponent {
   @ViewChild(CodemirrorComponent) private codemirrorComponent: CodemirrorComponent;
   cm: any; // reference to the codemirror object
   currentFile;
+  isEditingImage = false; // needed b/c currentFile is undefined on init
   editingFilesArray: Array<any> = []; // an array of all the files to edit
   allFilesArray: Array<any> = []; // an array of all the files to edit
   
@@ -66,6 +67,13 @@ export class EditorComponent {
     keyMap: "sublime",
     lineNumbers: true,
   };
+
+  imageConfig = {
+    ImageName: ' ',
+    AspectRatios: ["1:1", "2:3", "4:3", "16:9"],
+    ImageUrl: '',
+    ImageType: 'image/png'
+  }
 
   firepad; // current firepad object
   ref: firebase.database.Reference; // firebase database reference
@@ -118,6 +126,7 @@ export class EditorComponent {
       var self = this;
       var timeoutHandler;
       this.cm.on("change", function(cm, change) {
+        console.log("changed");
         if(!self.isSaving) {
           console.log("Waiting to save...");
           self.isSaving = true;
@@ -154,6 +163,11 @@ export class EditorComponent {
       this.userDisplayName = snapshot.val();
       this.cookie.set("user-displayName", snapshot.val());
     });
+
+    var self = this;
+    setInterval(function(){
+      self.updateTimestamp();
+    }, 60000);
   }
 
   /* Load a random file from the database into the editor */
@@ -189,6 +203,13 @@ export class EditorComponent {
     document.getElementById('userlist').innerHTML = '';
     this.firepad = Firepad.fromCodeMirror(file.firepadRef, this.cm, { userId: this.userId, userColor: this.userColor});
     var userlist = FirepadUserList.fromDiv(this.ref.child('users'), document.getElementById('userlist'), this.userId, this.userDisplayName, this.userColor, file.name);
+    var self = this;
+    // workaround hack that forces a re-render of the image editor component b/c can't manually change images
+    this.firepad.on('ready', function() {
+      if(file.isImage){
+        self.isEditingImage = true;
+      }
+    });
     this.updateTimestamp();
   }
 
@@ -206,7 +227,11 @@ export class EditorComponent {
       'md': 'text/markdown',
       'php': 'text/php',
       'css': 'text/css',
-      'txt': 'text/plain'
+      'txt': 'text/plain', 
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg'
     }
     let type = mimeTypes[extension];
     if(type != undefined){
@@ -222,32 +247,39 @@ export class EditorComponent {
    * @param {file}: Object - The file
   */
   saveToCloud(file){
-    // grab the timestamp element
-    var saveTimestampElement = document.getElementById('saveTimestamp');
-    saveTimestampElement.innerHTML = 'Saving......';
-    // set a reference to the file in the storage bucket
-    var storageRef = firebase.storage().ref().child(this.currentFile.storagePath)
-    // grab the contents of the editor as a string
-    let mimeType = this.matchMimeType(file.name);
-    var message = this.firepad.getText();
-    var myblob = new Blob([message], {
-        type: mimeType
-    });
-    var self = this;
     // put saves the file to firebase storage
-    storageRef.put(myblob).then(function(snapshot) {
-      // grab the current timestamp
-      let date = new Date();
-      let saveTimestamp = date.toLocaleTimeString();
-      saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
-      // set the ref in the firebase database with the timestamp
-      var databaseRef = firebase.database().ref().child('save').child(file.id);
-      var postData = {
-        "Timestamp": saveTimestamp
-      };
-      databaseRef.set(postData);
-      self.isSaving = false;
-    });
+    if(!file.isImage) {
+      // grab the timestamp element
+      var saveTimestampElement = document.getElementById('saveTimestamp');
+      saveTimestampElement.innerHTML = 'Saving......';
+      // set a reference to the file in the storage bucket
+      var storageRef = firebase.storage().ref().child(this.currentFile.storagePath)
+      // grab the contents of the editor as a string
+      let mimeType = this.matchMimeType(file.name);
+      var message = this.firepad.getText();
+      var myblob = new Blob([message], {
+          type: mimeType
+      });
+      var self = this;
+      storageRef.put(myblob).then(function(snapshot) {
+        // grab the current timestamp
+        let date = new Date();
+        let saveTimestamp = date.toLocaleTimeString();
+        // let saveTimestamp = date.toString();
+        // saveTimestampElement.innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
+        saveTimestampElement.innerHTML = '<u>Changes Saved!</u>';
+        // set the ref in the firebase database with the timestamp
+        var databaseRef = firebase.database().ref().child('save').child(file.id);
+        var postData = {
+          "Timestamp": saveTimestamp
+        };
+        databaseRef.set(postData);
+        self.isSaving = false;
+      });
+    }
+    else {
+      this.isSaving = false;
+    }
   }
 
   /**
@@ -257,7 +289,6 @@ export class EditorComponent {
   deleteFromStorage(file){
     // Create a reference to the file to delete
     var storageRef = firebase.storage().ref().child(file.storagePath);
-    console.log("Deleting from storage at",storageRef);
     storageRef.delete().then(function() {
       // File deleted successfully
       console.log('file deleted successfully!');
@@ -283,18 +314,22 @@ export class EditorComponent {
 
   // Render the current file in a new browser window
   serveFile(file){
-    var url = `http://files.cloud-code.net/${file.storagePath}`;;
+    var url = `http://files.cloud-code.net/${file.storagePath}`;
     window.open(url, '_blank');
   }
 
   // update the save timestamp when saved
   updateTimestamp(){
-    var timestampRef = this.ref.child('save').child(this.currentFile.id);
-    // listen for changes to the value of the timestamp
-    timestampRef.on('value', function(snapshot){
-      var saveTimestamp = snapshot.val()["Timestamp"];
-      document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved at ' + saveTimestamp + '</u>';
-    })
+    if(this.currentFile != undefined){
+      var timestampRef = this.ref.child('save').child(this.currentFile.id);
+      // listen for changes to the value of the timestamp
+      timestampRef.once('value', function(snapshot){
+        var saveTimestamp = snapshot.val()["Timestamp"];
+        var timestampStr;
+        document.getElementById('saveTimestamp').innerHTML = '<u>Last Saved ' + saveTimestamp + '</u>';
+
+      })
+    }
   }
 
   /**
@@ -302,6 +337,34 @@ export class EditorComponent {
    * @param {file}: Object - A reference the file object to change to
   */
   changeFile(file){
+    if(file.isImage == true){ // set the image config details in editor
+      this.setImageConfig(file);
+      this.isEditingImage = false;
+    }
+    this.loadFile(file);
+  }
+
+  /**
+   * Makes necessary changes to load an image
+   * @param {image}: Object - A reference the image object to change to
+  */
+  setImageConfig(image){
+    var storage = firebase.storage();
+    var storageRef = storage.ref().child(image.storagePath);
+    var url = `http://files.cloud-code.net/${image.storagePath}`;
+    this.imageConfig = {
+      ...this.imageConfig,
+      ImageUrl: url, 
+      ImageType: this.matchMimeType(image.name)
+    };
+  }
+
+  /**
+   * Makes necessary changes to load a file
+   * @param {file}: Object - A reference the file object to change to
+  */
+  loadFile(file){
+    this.isEditingImage = false;
     // create an object containing the filename & path to be stored for the editor tab interface
     this.events.publish('filename:updated', file);
     if (this.editingFilesArray.filter(f => f.name === file.name).length == 0) {
@@ -372,14 +435,20 @@ export class EditorComponent {
    * @param {file}: Object - The file object 
   */
   fileCreated(file){
-    console.log(file);
     var postData = {
-      "filename": file.name
+      "filename": file.name,
+      "isImage": file.isImage
     };
     file.databaseRef.set(postData);
-    this.setCurrentFile(file);
-    this.saveToCloud(file);
-    this.changeFile(file);
+
+    if(file.isImage) {
+      console.log("this is an image");
+    }
+    else {
+      this.setCurrentFile(file);
+      this.saveToCloud(file);
+      this.changeFile(file);
+    }
   }
 
   /**
@@ -387,9 +456,39 @@ export class EditorComponent {
    * @param {dirPath}: String - the path of the directory to delete
   */
   deleteDirectory(dirPath){
-    this.deleteDirectoryFromStorage(dirPath);
-    this.loadRandFile();
+    if(this.canDeleteDirectory(dirPath)){
+      this.deleteDirectoryFromStorage(dirPath);
+      this.loadRandFile();
+    } 
+    else {
+      alert("Cannot Delete Directory: Other users are modifying files under this directory");
+    }
   }
+
+  /**
+   * Checks to see if a directory can be deleted
+   * @param {dirname}: String - the name of the directory to delete
+  */
+  canDeleteDirectory(dirPath){
+    var canDelete = true;
+    let dirPathSplit = dirPath.split('/');
+    let dirName = dirPathSplit[dirPathSplit.length - 1]; // dirname is the last name in path
+    this.hasInitialized = false;
+    this._fileService.getFiles().subscribe(files => {
+      if(this.hasInitialized == false && files.length > 0){
+        for(var i=0; i<files.length; ++i){
+          // check if file is in directory
+          if(files[i].storagePath.includes(dirName) && files[i].isFile == true){
+            if(this.canDeleteFile(files[i]) == false){
+              canDelete = false;
+            }
+          }
+        }
+      }
+    });
+    return canDelete;
+  }
+
 
   /**
    * Delete the directory from Firebase cloud storage
@@ -427,25 +526,52 @@ export class EditorComponent {
 
 
   /**
+   * Checks to see if you can delete the given file
+   * @param {file}: String - the file to be deleted
+  */
+  canDeleteFile(file): boolean{
+    var self = this;
+    var canDelete = true;
+    this.ref.child('users').once("value", snapshot => {
+      snapshot.forEach(function(data) {
+        let userData = data.val();
+        if(data.key != self.userId) {
+          if(userData["currentFile"] == file.name) { // another user is viewing that file
+            canDelete = false;
+          }
+        }
+      });
+    })
+    return canDelete
+  }
+
+
+  /**
    * Delete the current file and switch to a new one
    * @param {file}: String - the file to be deleted
   */
   deleteFile(file){
-    file.databaseRef.remove();
-    file.firepadRef.remove();
-    this.deleteFromStorage(file);
-    // find the index within currently editing files
-    let indexOfFile = this.findNameInEditingFiles(this.currentFile.name);
-    if(indexOfFile > -1){
-      // delete the file from the tabs
-      this.editingFilesArray.splice(indexOfFile, 1);
 
-      if(this.editingFilesArray.length == 0){
-        this.loadRandFile();
-      }
-      else {
-        let fileToChange = this.editingFilesArray[indexOfFile-1];
-        this.changeFile(fileToChange);
+    if(this.canDeleteFile(file) == false){
+      alert("Cannot delete file: Another user is currently editing it");
+    }
+    else {
+      file.databaseRef.remove();
+      file.firepadRef.remove();
+      this.deleteFromStorage(file);
+      // find the index within currently editing files
+      let indexOfFile = this.findNameInEditingFiles(this.currentFile.name);
+      if(indexOfFile > -1){
+        // delete the file from the tabs
+        this.editingFilesArray.splice(indexOfFile, 1);
+
+        if(this.editingFilesArray.length == 0){
+          this.loadRandFile();
+        }
+        else {
+          let fileToChange = this.editingFilesArray[indexOfFile-1];
+          this.changeFile(fileToChange);
+        }
       }
     }
   }

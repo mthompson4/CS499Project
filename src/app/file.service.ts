@@ -72,6 +72,7 @@ export class FileService {
 						let dirObj = {
 							id: key,
 							isFile: false,
+							isImage: false,
 							name: data.key,
 							isToggled: isToggled,
 							absPath: newDirPath,
@@ -90,6 +91,7 @@ export class FileService {
 						let file = {
 							id: key,
 							isFile: true,
+							isImage: snapVal["isImage"],
 							name: snapVal["filename"],
 							isToggled: false,
 							absPath: fileAbsPath,

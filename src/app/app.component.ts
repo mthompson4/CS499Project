@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 import { CookieService } from 'ngx-cookie-service';
 import { NgForm } from '@angular/forms';
 import * as firebase from 'firebase/app';
@@ -37,6 +37,7 @@ export class AppComponent {
   isCollapsed = false; // if the sidebar is collapsed or not
   isNightMode = true; // if it is night mode or not
   public filesArr: Array<any> = [];
+  fileToUpload: File;
 
   @ViewChild('username-input') input;
 
@@ -75,6 +76,11 @@ export class AppComponent {
         command: () => presentModal('#deleteDirModal'),
         preventDefault: true
       },
+      { // Delete a directory
+        key: ['cmd + i'],
+        command: () => presentModal('#uploadImageModal'),
+        preventDefault: true
+      },
 
     ]);
 
@@ -89,6 +95,11 @@ export class AppComponent {
       this.currentFileName = file.name;
       this.currentFile = file;
     });
+
+    // User updates the image
+    events.subscribe('image:updated', (image) => {
+      this.updateImage(image);
+    });
    }
 
   ngOnInit(){
@@ -96,6 +107,7 @@ export class AppComponent {
     this.editFileName();
     this.populateFilesArr();
     modalListener('#newFileModal', '#newFileModalError');
+    modalListener('#uploadImageModal', '#newFileModalError');
   }
 
   ngAfterViewInit(){
@@ -186,7 +198,8 @@ export class AppComponent {
    * @param {form}: NgForm - the returned form data
   */
   fileCreated(form : NgForm) {
-    var newDirPath = form.value["toDirectory"]
+    var newDirPath = form.value["toDirectory"];
+    console.log(form.value);
     if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
         newDirPath = this.topLevelDir;
     }
@@ -206,6 +219,7 @@ export class AppComponent {
       let file = {
         id: newFileRef.key,
         isFile: true,
+        isImage: false,
         name: newFileName,
         isToggled: false,
         absPath: fileAbsPath,
@@ -250,6 +264,72 @@ export class AppComponent {
 
       closeModal('#newDirModal');
     }
+  }
+
+
+  /** 
+   * Updates an image object in cloud storage
+   * @param {image}: File - the image object data
+  */
+  updateImage(image){
+    var storageRef = firebase.storage().ref().child(this.currentFile.storagePath);
+    var self = this;
+    storageRef.put(image).then(function(snapshot) {
+      self.events.publish('file:toggled', self.currentFile);
+    });
+  }
+
+  saveImage(image, filePath, imageName){
+    var storageRef = firebase.storage().ref().child(filePath).child(imageName);
+    var self = this;
+    storageRef.put(image).then(function(snapshot) {
+      // Create a file object with various metatdata
+      let newFileRef = self.ref.child(filePath).push();
+      let fileAbsPath = filePath + '/' + newFileRef.key;
+      let storagePath = filePath + '/' + imageName;
+      let splitPath = filePath.split('/');
+      let parentNodeId = splitPath[splitPath.length-1];
+      
+      let file = {
+        id: newFileRef.key,
+        isFile: true,
+        isImage: true,
+        name: imageName,
+        isToggled: false,
+        absPath: fileAbsPath,
+        storagePath: storagePath,
+        parent: parentNodeId,
+        databaseRef: newFileRef,
+        firepadRef: self.ref.child('firepad').child(newFileRef.key)
+      }
+      self.currentFileName = imageName;
+      self.events.publish('file:created', file);
+    });
+  }
+
+  /** 
+   * Create an image object when the upload image form is completed
+   * @param {form}: NgForm - the returned form data
+  */
+  imageUploaded(form : NgForm) {
+    var newDirPath = form.value["toDirectory"]
+    if(newDirPath == null || newDirPath == "" || newDirPath == undefined){
+        newDirPath = this.topLevelDir;
+    }
+    if(this.fileToUpload == undefined) {
+      console.log("no file provided");
+    }
+    else {
+      console.log(this.fileToUpload);
+      this.saveImage(this.fileToUpload, newDirPath, this.fileToUpload.name);
+    }
+    closeModal('#uploadImageModal');
+
+  }
+
+  // sets the current image when uploaded
+  handleFileInput(files: FileList){
+    this.fileToUpload = files.item(0);
   }
 
 

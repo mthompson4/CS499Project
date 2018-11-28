@@ -27,11 +27,13 @@
               "node_modules/highlight.js/styles/github.css",
               "node_modules/codemirror/lib/codemirror.css",
               "src/libs/firepad/dist/firepad.css",
-              "src/assets/css/firepad-userlist.css"
+              "src/assets/css/firepad-userlist.css",
+              "node_modules/cropperjs/dist/cropper.css"
             ],
             "scripts": [
               "src/assets/js/js_helpers.js",
-              "src/assets/js/firepad-userlist.js"
+              "src/assets/js/firepad-userlist.js",
+              "node_modules/cropperjs/dist/cropper.js"
             ]
           },
           "configurations": {

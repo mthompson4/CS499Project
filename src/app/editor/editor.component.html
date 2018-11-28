@@ -17,4 +17,5 @@
 </ul>
 </ng-container>
 
-<codemirror [config]="options" id="codemirrorElement"></codemirror>
+<codemirror [hidden]="isEditingImage" [config]="options" id="codemirrorElement"></codemirror>
+<image-editor [imageConfig]="imageConfig" *ngIf="isEditingImage"></image-editor>

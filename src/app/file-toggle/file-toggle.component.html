@@ -15,7 +15,8 @@
 		   	(contextmenu)="onRightClick(item, p1, $event)" 
 		    (click)="fileClicked(item)"
 		>
-	    	<span class="octicon octicon-file-code"></span>
+	    	<!-- <span class="octicon octicon-file-code"></span> -->
+	    	<ng-container *ngIf="item.isImage; then imageIcon; else fileIcon"></ng-container>
 	    	<span> {{item.name}} </span>
 	    	<file-toggle [parentId]="item.id" [dataList]="removeCurrentLevelItems(dataList,parentId)"></file-toggle>
 	    </li>
@@ -172,3 +173,10 @@
 </div>
 </ng-template>
 
+<ng-template #fileIcon>
+	<span class="octicon octicon-file-code"></span>
+</ng-template>
+
+<ng-template #imageIcon>
+	<span class="octicon octicon-device-camera"></span>
+</ng-template>

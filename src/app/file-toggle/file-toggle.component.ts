@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { Events } from 'ionic-angular';
+import { Events } from '@ionic/angular'; 
 import { CookieService } from 'ngx-cookie-service';
 import { Observable } from 'rxjs';
 import { FileService } from '../file.service';
@@ -113,7 +113,7 @@ export class FileToggleComponent {
    * @param {file}: Object - the file clicked
   */
 	fileClicked(file){
-		this.events.publish('file:toggled', file);
+    this.events.publish('file:toggled', file);
 	}
 
   /** 
